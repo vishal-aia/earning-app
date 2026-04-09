@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarnReal - Mobile Earning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card { border-radius: 20px; transition: 0.3s; }
+        .card:active { transform: scale(0.98); }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Header / Balance -->
+    <div class="gradient-bg p-8 text-white text-center rounded-b-[40px] shadow-lg">
+        <p class="text-sm opacity-80 uppercase tracking-widest">Aapka Balance</p>
+        <h1 class="text-5xl font-extrabold my-2">₹ <span id="balance">0.00</span></h1>
+    </div>
+
+    <!-- User Tasks -->
+    <div class="p-6 space-y-4">
+        <div onclick="doCheckIn()" class="card bg-white p-6 flex justify-between items-center shadow-sm border-l-4 border-green-500 cursor-pointer">
+            <div>
+                <h3 class="font-bold text-lg text-gray-800">Daily Check-in</h3>
+                <p id="checkin-text" class="text-sm text-gray-500 italic">Get ₹0.00</p>
+            </div>
+            <span class="text-2xl">🎁</span>
+        </div>
+
+        <div onclick="watchAd()" class="card bg-white p-6 flex justify-between items-center shadow-sm border-l-4 border-blue-500 cursor-pointer">
+            <div>
+                <h3 class="font-bold text-lg text-gray-800">Watch Ad Video</h3>
+                <p class="text-sm text-gray-500">Earn unlimited rewards</p>
+            </div>
+            <span class="text-2xl">📺</span>
+        </div>
+    </div>
+
+    <!-- SECRET ADMIN BUTTON (Tap 5 times on version to open) -->
+    <p onclick="adminCount++" class="text-center text-gray-300 text-xs mt-10">Version 1.0.4</p>
+    <div id="admin-panel" class="hidden fixed inset-0 bg-white p-6 overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-4">Admin Control Center</h2>
+        <input id="adm-checkin" type="number" placeholder="Check-in Reward" class="w-full border p-3 mb-3 rounded-lg">
+        <input id="adm-adlink" type="text" placeholder="Adsterra Link" class="w-full border p-3 mb-3 rounded-lg">
+        <button onclick="saveSettings()" class="w-full bg-black text-white p-4 rounded-lg">SAVE CHANGES</button>
+        <button onclick="closeAdmin()" class="w-full mt-4 text-red-500">Close</button>
+    </div>
+
+    <script>
+        let adminCount = 0;
+        let backendUrl = "https://your-backend-render-url.com"; // Isko baad mein badlenge
+        
+        // 1. Settings Load Karein (Admin jo set karega wahi dikhega)
+        async function loadData() {
+            const res = await fetch(`${backendUrl}/api/settings`);
+            const data = await res.json();
+            document.getElementById('checkin-text').innerText = "Get ₹" + data.checkInReward;
+            window.adLink = data.adLink;
+        }
+
+        // 2. Check-in Logic
+        async function doCheckIn() {
+            // Backend ko call jayega
+            alert("Reward Claimed!");
+            // Local balance update (Sirf dikhane ke liye)
+        }
+
+        function watchAd() {
+            window.open(window.adLink, '_blank');
+        }
+
+        // Secret Admin Toggle
+        setInterval(() => {
+            if(adminCount >= 5) {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                adminCount = 0;
+            }
+        }, 1000);
+
+        async function saveSettings() {
+            const checkInReward = document.getElementById('adm-checkin').value;
+            const adLink = document.getElementById('adm-adlink').value;
+            // Send to backend
+            alert("Admin Settings Saved!");
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
