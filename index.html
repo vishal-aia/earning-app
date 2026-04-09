@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <title>EarnMaster - Daily Rewards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-indigo-600 p-4 text-white shadow-md">
+        <div class="flex justify-between items-center max-w-lg mx-auto">
+            <h1 class="text-xl font-bold">EarnMaster</h1>
+            <div class="bg-indigo-800 px-4 py-1 rounded-full text-sm font-semibold">
+                Balance: ₹<span id="balanceDisplay">0.00</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-lg mx-auto p-4 space-y-4">
+        <!-- Dashboard Card -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center">
+            <p class="text-gray-500 text-sm">Aaj ki Kamayi</p>
+            <h2 class="text-3xl font-black text-indigo-600">₹<span id="todayEarn">0.00</span></h2>
+        </div>
+
+        <!-- Task 1 -->
+        <div onclick="claimDaily()" class="bg-white p-5 rounded-2xl flex justify-between items-center shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-all">
+            <div class="flex items-center gap-4">
+                <div class="bg-yellow-100 p-3 rounded-xl text-2xl">🎁</div>
+                <div>
+                    <h3 class="font-bold text-gray-800">Daily Bonus</h3>
+                    <p class="text-xs text-gray-500">Rozana free reward payein</p>
+                </div>
+            </div>
+            <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold">CLAIM</button>
+        </div>
+
+        <!-- Task 2 (Ads) -->
+        <div onclick="watchAds()" class="bg-white p-5 rounded-2xl flex justify-between items-center shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-all">
+            <div class="flex items-center gap-4">
+                <div class="bg-blue-100 p-3 rounded-xl text-2xl">📺</div>
+                <div>
+                    <h3 class="font-bold text-gray-800">Watch Ads</h3>
+                    <p class="text-xs text-gray-500">Unlimited video dekhein</p>
+                </div>
+            </div>
+            <button class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold">EARN</button>
+        </div>
+    </div>
+
+    <script>
+        let backendUrl = "APKA_RENDER_BACKEND_URL"; // Isko hum baad mein Render se milne waale URL se badlenge.
+
+        async function watchAds() {
+            const res = await fetch(`${backendUrl}/api/settings`);
+            const settings = await res.json();
+            window.open(settings.adLink, '_blank');
+        }
+
+        async function claimDaily() {
+            // Logic to call Backend /api/earn/checkin
+            alert("Aaj ka reward claim kar liya gaya!");
+        }
+    </script>
+</body>
+</html>
