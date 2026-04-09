@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: /admin.html
+Disallow: /v-master-786-private-access.html
+
 Sitemap: https://apki-site.vercel.app/sitemap.xml
