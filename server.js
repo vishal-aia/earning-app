@@ -1,58 +1,81 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const path = require('path'); // Ye line zaruri hai
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("Database Connected"))
-  .catch(err => console.log("DB Error:", err));
+mongoose.connect(process.env.MONGO_URI).then(() => console.log("Pro DB Connected"));
 
-// --- Database Models ---
-const User = mongoose.model('User', new mongoose.Schema({
+// --- Database Schema ---
+const UserSchema = new mongoose.Schema({
     email: { type: String, unique: true },
     balance: { type: Number, default: 0 },
-    deviceId: String
-}));
+    deviceId: { type: String, unique: true },
+    lastCheckIn: Date,
+    checkInStreak: { type: Number, default: 0 },
+    lastTaskTime: Date,
+    isBlocked: { type: Boolean, default: false }
+});
+const User = mongoose.model('User', UserSchema);
 
-const Settings = mongoose.model('Settings', new mongoose.Schema({
-    checkInReward: { type: Number, default: 1 },
-    adLink: { type: String, default: "" },
-    minWithdraw: { type: Number, default: 100 }
-}));
+const SettingsSchema = new mongoose.Schema({
+    checkInRewards: { type: Array, default: [1, 2, 3, 4, 5, 6, 10] }, // 7 days
+    spinProbabilities: { type: Array, default: [0.1, 0.5, 0, 1, 0, 0.2] },
+    taskTimer: { type: Number, default: 30 }, // Seconds
+    minWithdraw: { type: Number, default: 100 },
+    adLink: String
+});
+const Settings = mongoose.model('Settings', SettingsSchema);
 
 // --- APIs ---
 
-app.get('/api/settings', async (req, res) => {
+// 1. Daily Check-in Logic (7-Day Reset)
+app.post('/api/earn/checkin', async (req, res) => {
+    const { userId } = req.body;
+    const user = await User.findById(userId);
     const settings = await Settings.findOne();
-    res.json(settings || { checkInReward: 1, adLink: "", minWithdraw: 100 });
+    
+    const now = new Date();
+    if (user.lastCheckIn && user.lastCheckIn.toDateString() === now.toDateString()) {
+        return res.status(400).json({ msg: "Aaj ka reward le liya hai!" });
+    }
+
+    let day = user.checkInStreak % 7;
+    let reward = settings.checkInRewards[day];
+    
+    user.balance += reward;
+    user.checkInStreak += 1;
+    user.lastCheckIn = now;
+    await user.save();
+    
+    res.json({ msg: `Day ${day+1} Reward Recieved: ₹${reward}`, balance: user.balance });
 });
 
-app.post('/api/admin/update', async (req, res) => {
-    const { checkInReward, adLink, minWithdraw } = req.body;
-    await Settings.findOneAndUpdate({}, { checkInReward, adLink, minWithdraw }, { upsert: true });
-    res.json({ success: true });
+// 2. Task Validation (Timer System)
+app.post('/api/earn/start-task', async (req, res) => {
+    const { userId } = req.body;
+    const user = await User.findById(userId);
+    user.lastTaskTime = new Date();
+    await user.save();
+    res.json({ msg: "Task Started" });
 });
 
-// --- FRONTEND CONNECTION (Ye "Cannot GET /" error theek karega) ---
+app.post('/api/earn/claim-task', async (req, res) => {
+    const { userId } = req.body;
+    const user = await User.findById(userId);
+    const settings = await Settings.findOne();
 
-// 1. Sabhi files ko access karne ki ijazat dein
-app.use(express.static(path.join(__dirname, '.')));
+    const timePassed = (new Date() - user.lastTaskTime) / 1000;
+    if (timePassed < settings.taskTimer) {
+        return res.status(400).json({ msg: "Cheat mat karo! Ad poora dekho." });
+    }
 
-// 2. Home page dikhane ke liye
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    user.balance += 0.5; // Example reward
+    await user.save();
+    res.json({ msg: "₹0.50 Added!", balance: user.balance });
 });
 
-// 3. Admin panel dikhane ke liye (Apni file ka asli naam yahan likhein)
-app.get('/admin-panel', (req, res) => {
-    res.sendFile(path.join(__dirname, 'v-master-786-private-access.html'));
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+app.listen(process.env.PORT || 5000);
