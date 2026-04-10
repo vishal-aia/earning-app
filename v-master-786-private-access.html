@@ -1,17 +1,95 @@
-<!-- Iska code thoda bada hoga isliye main isme main functionality de raha hoon -->
-<div class="p-6 bg-gray-900 min-h-screen text-white">
-    <h1 class="text-2xl font-bold text-yellow-500 mb-6">PRO ADMIN CONTROL</h1>
-    
-    <div class="bg-gray-800 p-4 rounded-xl mb-4">
-        <label>7-Day Rewards (Comma separated)</label>
-        <input id="checkin-array" type="text" value="1,2,3,4,5,10,20" class="w-full p-3 bg-gray-700 rounded mt-2">
-        <p class="text-[10px] text-gray-400 mt-1">Example: Day1 reward is 1, Day2 is 2...</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MASTER ACCESS - PRO</title>
+    <meta name="robots" content="noindex, nofollow">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-white min-h-screen">
+
+    <div id="login-box" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-6">
+        <div class="w-full max-w-sm bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 text-center shadow-2xl">
+            <h1 class="text-3xl font-black text-indigo-500 mb-2 italic">SECURE LOGIN</h1>
+            <p class="text-slate-500 text-xs mb-8 uppercase tracking-widest">Master Control Panel</p>
+            <input id="pin" type="password" placeholder="••••" class="w-full bg-slate-950 border border-slate-800 p-5 rounded-2xl text-center text-3xl font-bold mb-6 outline-none focus:border-indigo-500 transition-all">
+            <button onclick="login()" class="w-full bg-indigo-600 p-5 rounded-2xl font-black text-lg hover:bg-indigo-500 shadow-lg shadow-indigo-900/20">ACCESS PANEL</button>
+        </div>
     </div>
 
-    <div class="bg-gray-800 p-4 rounded-xl mb-4">
-        <label>Task Timer (Seconds)</label>
-        <input id="timer" type="number" value="30" class="w-full p-3 bg-gray-700 rounded mt-2">
+    <div id="panel" class="hidden p-6 max-w-xl mx-auto pb-24">
+        <header class="mb-10 flex justify-between items-center">
+            <div>
+                <h2 class="text-3xl font-black text-white">DASHBOARD</h2>
+                <p class="text-indigo-500 text-xs font-bold uppercase">Real-time Control</p>
+            </div>
+            <div class="h-12 w-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-900/40">
+                <span class="text-xl">⚡</span>
+            </div>
+        </header>
+
+        <div class="space-y-6">
+            <!-- 🛑 RENDER URL SECTION (Hardcoded) -->
+            <div class="bg-slate-900 p-6 rounded-[2rem] border border-slate-800">
+                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Backend Node</label>
+                <div id="url-display" class="mt-2 p-4 bg-slate-950 rounded-xl border border-slate-800 text-indigo-400 font-mono text-xs overflow-hidden truncate">
+                    PASTE_YOUR_RENDER_URL_HERE
+                </div>
+            </div>
+
+            <!-- SETTINGS -->
+            <div class="bg-slate-900 p-8 rounded-[2rem] border border-slate-800 space-y-6 shadow-xl">
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase">7-Day Reward Cycle (₹)</label>
+                    <input id="rewards" type="text" value="1,2,3,4,5,6,10" class="w-full bg-slate-950 mt-2 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 transition-all">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Task Ad Link (Smartlink)</label>
+                    <input id="ad-link" type="text" placeholder="https://..." class="w-full bg-slate-950 mt-2 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 transition-all">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Timer (Sec)</label>
+                        <input id="timer" type="number" value="30" class="w-full bg-slate-950 mt-2 p-4 rounded-xl border border-slate-800">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Min Pay (₹)</label>
+                        <input id="min" type="number" value="100" class="w-full bg-slate-950 mt-2 p-4 rounded-xl border border-slate-800">
+                    </div>
+                </div>
+                <button onclick="update()" class="w-full bg-indigo-600 p-5 rounded-2xl font-black text-lg shadow-xl shadow-indigo-900/30 active:scale-95 transition-all">DEPLOY UPDATES</button>
+            </div>
+        </div>
     </div>
 
-    <button onclick="updateSettings()" class="w-full bg-green-600 p-4 rounded-xl font-bold">UPDATE SETTINGS</button>
-</div>
+    <script>
+        // 🛑 IMPORTANT: PASTE YOUR RENDER URL BELOW
+        const backendUrl = "https://earn-hub-z1su.onrender.com"; 
+        const MASTER_PIN = "2412";
+
+        function login() {
+            if(document.getElementById('pin').value === MASTER_PIN) {
+                document.getElementById('login-box').style.display = 'none';
+                document.getElementById('panel').classList.remove('hidden');
+                document.getElementById('url-display').innerText = backendUrl;
+            } else { alert("WRONG PIN"); }
+        }
+
+        async function update() {
+            const data = {
+                checkInRewards: document.getElementById('rewards').value.split(',').map(Number),
+                adLink: document.getElementById('ad-link').value,
+                taskTimer: document.getElementById('timer').value,
+                minWithdraw: document.getElementById('min').value
+            };
+            const res = await fetch(`${backendUrl}/api/admin/update`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            if(res.ok) alert("✅ SYSTEM SYNCHRONIZED SUCCESSFULLY");
+        }
+    </script>
+</body>
+</html>
