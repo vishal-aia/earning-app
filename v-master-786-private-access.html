@@ -3,92 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MASTER ACCESS - PRO</title>
-    <meta name="robots" content="noindex, nofollow">
+    <title>Enterprise Admin - Private</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-950 text-white min-h-screen">
+<body class="bg-slate-900 text-white p-6">
 
-    <div id="login-box" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-6">
-        <div class="w-full max-w-sm bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800 text-center shadow-2xl">
-            <h1 class="text-3xl font-black text-indigo-500 mb-2 italic">SECURE LOGIN</h1>
-            <p class="text-slate-500 text-xs mb-8 uppercase tracking-widest">Master Control Panel</p>
-            <input id="pin" type="password" placeholder="••••" class="w-full bg-slate-950 border border-slate-800 p-5 rounded-2xl text-center text-3xl font-bold mb-6 outline-none focus:border-indigo-500 transition-all">
-            <button onclick="login()" class="w-full bg-indigo-600 p-5 rounded-2xl font-black text-lg hover:bg-indigo-500 shadow-lg shadow-indigo-900/20">ACCESS PANEL</button>
+    <div id="login" class="fixed inset-0 bg-black flex items-center justify-center z-50">
+        <div class="bg-slate-800 p-8 rounded-[2rem] text-center w-80">
+            <h2 class="text-2xl font-black mb-6">ADMIN LOGIN</h2>
+            <input id="pin" type="password" placeholder="PIN" class="w-full p-4 bg-slate-900 rounded-xl mb-4 text-center text-2xl font-bold">
+            <button onclick="check()" class="w-full bg-indigo-600 p-4 rounded-xl font-bold">ACCESS</button>
         </div>
     </div>
 
-    <div id="panel" class="hidden p-6 max-w-xl mx-auto pb-24">
-        <header class="mb-10 flex justify-between items-center">
-            <div>
-                <h2 class="text-3xl font-black text-white">DASHBOARD</h2>
-                <p class="text-indigo-500 text-xs font-bold uppercase">Real-time Control</p>
+    <div id="panel" class="hidden max-w-4xl mx-auto">
+        <h1 class="text-4xl font-black text-indigo-500 mb-8 tracking-tighter uppercase">Platform Master Control</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700">
+                <p class="text-xs text-slate-500 uppercase font-bold">Total Users</p>
+                <h3 id="u-count" class="text-3xl font-black">Loading...</h3>
             </div>
-            <div class="h-12 w-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-900/40">
-                <span class="text-xl">⚡</span>
+            <div class="bg-slate-800 p-6 rounded-[2rem] border border-slate-700">
+                <p class="text-xs text-slate-500 uppercase font-bold">Pending Withdraws</p>
+                <h3 id="w-count" class="text-3xl font-black text-orange-500">Loading...</h3>
             </div>
-        </header>
+        </div>
 
-        <div class="space-y-6">
-            <!-- 🛑 RENDER URL SECTION (Hardcoded) -->
-            <div class="bg-slate-900 p-6 rounded-[2rem] border border-slate-800">
-                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Backend Node</label>
-                <div id="url-display" class="mt-2 p-4 bg-slate-950 rounded-xl border border-slate-800 text-indigo-400 font-mono text-xs overflow-hidden truncate">
-                    PASTE_YOUR_RENDER_URL_HERE
-                </div>
-            </div>
-
-            <!-- SETTINGS -->
-            <div class="bg-slate-900 p-8 rounded-[2rem] border border-slate-800 space-y-6 shadow-xl">
+        <!-- Controls -->
+        <div class="bg-slate-800 p-8 rounded-[3rem] border border-slate-700 space-y-6">
+            <h2 class="text-xl font-bold border-b border-slate-700 pb-4">Reward Settings</h2>
+            
+            <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="text-xs font-bold text-slate-400 uppercase">7-Day Reward Cycle (₹)</label>
-                    <input id="rewards" type="text" value="1,2,3,4,5,6,10" class="w-full bg-slate-950 mt-2 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 transition-all">
+                    <label class="text-[10px] uppercase font-bold text-slate-500">Render Backend URL</label>
+                    <input id="url" type="text" class="w-full bg-slate-900 p-4 rounded-xl mt-2 text-blue-400 text-xs">
                 </div>
                 <div>
-                    <label class="text-xs font-bold text-slate-400 uppercase">Task Ad Link (Smartlink)</label>
-                    <input id="ad-link" type="text" placeholder="https://..." class="w-full bg-slate-950 mt-2 p-4 rounded-xl border border-slate-800 outline-none focus:border-indigo-500 transition-all">
+                    <label class="text-[10px] uppercase font-bold text-slate-500">Ad Link</label>
+                    <input id="ad" type="text" class="w-full bg-slate-900 p-4 rounded-xl mt-2 text-xs">
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase">Timer (Sec)</label>
-                        <input id="timer" type="number" value="30" class="w-full bg-slate-950 mt-2 p-4 rounded-xl border border-slate-800">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase">Min Pay (₹)</label>
-                        <input id="min" type="number" value="100" class="w-full bg-slate-950 mt-2 p-4 rounded-xl border border-slate-800">
-                    </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-slate-500">Task Timer (Sec)</label>
+                    <input id="timer" type="number" class="w-full bg-slate-900 p-4 rounded-xl mt-2">
                 </div>
-                <button onclick="update()" class="w-full bg-indigo-600 p-5 rounded-2xl font-black text-lg shadow-xl shadow-indigo-900/30 active:scale-95 transition-all">DEPLOY UPDATES</button>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-slate-500">Min. Withdraw (₹)</label>
+                    <input id="min" type="number" class="w-full bg-slate-900 p-4 rounded-xl mt-2">
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-slate-500">Spin Values (Comma)</label>
+                    <input id="spin" type="text" class="w-full bg-slate-900 p-4 rounded-xl mt-2">
+                </div>
+            </div>
+
+            <button onclick="save()" class="w-full bg-indigo-600 p-5 rounded-2xl font-black text-lg shadow-xl shadow-indigo-900/20">DEPLOY UPDATES TO LIVE SERVER</button>
+        </div>
+
+        <!-- Withdraw Requests -->
+        <div class="mt-10 bg-slate-800 p-8 rounded-[3rem]">
+            <h2 class="text-xl font-bold mb-4">Withdrawal Manager</h2>
+            <div id="w-list" class="space-y-4 text-sm">
+                <!-- List will appear here -->
             </div>
         </div>
     </div>
 
     <script>
-        // 🛑 IMPORTANT: PASTE YOUR RENDER URL BELOW
-        const backendUrl = "https://earn-hub-z1su.onrender.com"; 
-        const MASTER_PIN = "2412";
+        const MASTER_PIN = "2412"; 
 
-        function login() {
+        function check() {
             if(document.getElementById('pin').value === MASTER_PIN) {
-                document.getElementById('login-box').style.display = 'none';
+                document.getElementById('login').style.display = 'none';
                 document.getElementById('panel').classList.remove('hidden');
-                document.getElementById('url-display').innerText = backendUrl;
-            } else { alert("WRONG PIN"); }
+                loadStats();
+            }
         }
 
-        async function update() {
+        async function loadStats() {
+            const backendUrl = document.getElementById('url').value || localStorage.getItem('r_url');
+            if(!backendUrl) return;
+            const res = await fetch(`${backendUrl}/api/admin/stats`);
+            const data = await res.json();
+            document.getElementById('u-count').innerText = data.totalUsers;
+            document.getElementById('w-count').innerText = data.pendingWithdraws.length;
+            
+            // Fill Inputs
+            document.getElementById('ad').value = data.settings.adLink;
+            document.getElementById('timer').value = data.settings.taskTimer;
+            document.getElementById('min').value = data.settings.minWithdraw;
+        }
+
+        async function save() {
+            const backendUrl = document.getElementById('url').value;
+            localStorage.setItem('r_rurl', backendUrl);
             const data = {
-                checkInRewards: document.getElementById('rewards').value.split(',').map(Number),
-                adLink: document.getElementById('ad-link').value,
+                adLink: document.getElementById('ad').value,
                 taskTimer: document.getElementById('timer').value,
-                minWithdraw: document.getElementById('min').value
+                minWithdraw: document.getElementById('min').value,
+                spinValues: document.getElementById('spin').value.split(',').map(Number)
             };
-            const res = await fetch(`${backendUrl}/api/admin/update`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            if(res.ok) alert("✅ SYSTEM SYNCHRONIZED SUCCESSFULLY");
+            await fetch(`${backendUrl}/api/admin/update`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+            alert("✅ Server Updated!");
         }
     </script>
 </body>
