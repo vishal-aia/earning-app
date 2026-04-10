@@ -1,78 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Control</title>
-    <meta name="robots" content="noindex, nofollow"> <!-- Google se chupane ke liye -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        #admin-content { display: none; } /* Shuru me sab chupa rahega */
-    </style>
-</head>
-<body class="bg-gray-900 text-white">
-
-    <!-- Login Box -->
-    <div id="login-screen" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-50">
-        <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-80 text-center">
-            <h2 class="text-xl font-bold mb-4 text-yellow-400">Admin Login</h2>
-            <input id="admin-pin" type="password" placeholder="Enter Secret PIN" class="w-full p-3 rounded bg-gray-700 mb-4 outline-none border border-gray-600 focus:border-yellow-400">
-            <button onclick="checkPin()" class="w-full bg-yellow-400 text-black font-bold py-3 rounded-lg">Login</button>
-            <p id="error" class="text-red-500 text-xs mt-2 hidden">Galat PIN hai!</p>
-        </div>
+<!-- Iska code thoda bada hoga isliye main isme main functionality de raha hoon -->
+<div class="p-6 bg-gray-900 min-h-screen text-white">
+    <h1 class="text-2xl font-bold text-yellow-500 mb-6">PRO ADMIN CONTROL</h1>
+    
+    <div class="bg-gray-800 p-4 rounded-xl mb-4">
+        <label>7-Day Rewards (Comma separated)</label>
+        <input id="checkin-array" type="text" value="1,2,3,4,5,10,20" class="w-full p-3 bg-gray-700 rounded mt-2">
+        <p class="text-[10px] text-gray-400 mt-1">Example: Day1 reward is 1, Day2 is 2...</p>
     </div>
 
-    <!-- Main Admin Content -->
-    <div id="admin-content" class="p-6 max-w-lg mx-auto">
-        <h1 class="text-3xl font-black text-yellow-400 mb-6">CONTROL PANEL</h1>
-        
-        <div class="space-y-6 bg-gray-800 p-6 rounded-3xl border border-gray-700 shadow-xl">
-            <div>
-                <label class="block text-sm text-gray-400">Check-in Reward (₹)</label>
-                <input id="checkin" type="number" class="w-full bg-gray-700 p-4 rounded-xl mt-1 border border-gray-600">
-            </div>
-            <div>
-                <label class="block text-sm text-gray-400">Adsterra/Monetag Link</label>
-                <input id="adlink" type="text" class="w-full bg-gray-700 p-4 rounded-xl mt-1 border border-gray-600">
-            </div>
-            <div>
-                <label class="block text-sm text-gray-400">Min. Withdraw (₹)</label>
-                <input id="minWithdraw" type="number" class="w-full bg-gray-700 p-4 rounded-xl mt-1 border border-gray-600">
-            </div>
-            <button onclick="saveAdmin()" class="w-full bg-yellow-400 text-gray-900 font-black p-5 rounded-2xl">SAVE SETTINGS</button>
-        </div>
+    <div class="bg-gray-800 p-4 rounded-xl mb-4">
+        <label>Task Timer (Seconds)</label>
+        <input id="timer" type="number" value="30" class="w-full p-3 bg-gray-700 rounded mt-2">
     </div>
 
-    <script>
-        // --- SECURITY ---
-        const SECRET_PIN = "2412"; // Yahan APNA pasand ka PIN rakhein
-
-        function checkPin() {
-            const enteredPin = document.getElementById('admin-pin').value;
-            if(enteredPin === SECRET_PIN) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('admin-content').style.display = 'block';
-            } else {
-                document.getElementById('error').classList.remove('hidden');
-                setTimeout(() => window.location.href = "index.html", 1000); // 1 sec baad home par bhej dega
-            }
-        }
-
-        let backendUrl = "https://apki-site-backend.onrender.com"; // Render URL
-
-        async function saveAdmin() {
-            const data = {
-                checkInReward: document.getElementById('checkin').value,
-                adLink: document.getElementById('adlink').value,
-                minWithdraw: document.getElementById('minWithdraw').value
-            };
-            const res = await fetch(`${backendUrl}/api/admin/update`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            if(res.ok) alert("Settings Saved!");
-        }
-    </script>
-</body>
-</html>
+    <button onclick="updateSettings()" class="w-full bg-green-600 p-4 rounded-xl font-bold">UPDATE SETTINGS</button>
+</div>
