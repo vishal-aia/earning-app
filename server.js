@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const app = express();
@@ -11,68 +10,76 @@ app.use(cors());
 
 mongoose.connect(process.env.MONGO_URI).then(() => console.log("Enterprise System Live"));
 
-// --- DATABASE MODELS ---
-const Settings = mongoose.model('Settings', new mongoose.Schema({
-    checkInReward: { type: Array, default: [1, 1, 2, 2, 3, 3, 5] },
-    smartlinkReward: { type: Number, default: 0.5 },
-    minWithdraw: { type: Number, default: 100 },
-    adLink: { type: String, default: "https://google.com" },
-    taskTimer: { type: Number, default: 30 },
-    referralBonus: { type: Number, default: 5 }
-}));
-
+// --- SCHEMAS ---
 const User = mongoose.model('User', new mongoose.Schema({
     email: { type: String, unique: true },
     password: { type: String },
     deviceId: { type: String, unique: true },
     balance: { type: Number, default: 0 },
-    refBy: String,
-    referralCode: { type: String, unique: true },
-    isBlocked: { type: Boolean, default: false },
-    lastTaskAt: Date
+    streak: { type: Number, default: 0 },
+    lastCheckIn: Date,
+    lastWithdrawDate: Date,
+    isBlocked: { type: Boolean, default: false }
+}));
+
+const Task = mongoose.model('Task', new mongoose.Schema({
+    type: String, // smartlink, shortener, cpa
+    title: String,
+    reward: Number,
+    link: String,
+    limit: { type: Number, default: 10 }
 }));
 
 const Withdraw = mongoose.model('Withdraw', new mongoose.Schema({
-    userId: String, email: String, amount: Number, method: String,
-    status: { type: String, default: 'Pending' }, txnId: String, date: { type: Date, default: Date.now }
+    userId: String, email: String, amount: Number, status: { type: String, default: 'Pending' },
+    date: { type: Date, default: Date.now }, txnId: String
 }));
 
-// --- AUTH APIs ---
-app.post('/api/auth/signup', async (req, res) => {
-    const { email, password, deviceId, refCode } = req.body;
-    const exists = await User.findOne({ $or: [{ email }, { deviceId }] });
-    if (exists) return res.status(400).json({ msg: "Email or Device already registered!" });
+const Settings = mongoose.model('Settings', new mongoose.Schema({
+    checkInRewards: { type: Array, default: [1, 2, 3, 4, 5, 10, 20] },
+    minWithdraw: { type: Number, default: 100 }
+}));
+
+// --- LOGIC APIs ---
+
+// 1. Check-In (24h Limit + 7 Day Streak)
+app.post('/api/earn/checkin', async (req, res) => {
+    const { userId } = req.body;
+    const user = await User.findById(userId);
+    const set = await Settings.findOne();
     
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const myRefCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const now = new Date();
+    if(user.lastCheckIn && (now - user.lastCheckIn) < 86400000) {
+        return res.status(400).json({ msg: "24 ghante baad wapas aayein!" });
+    }
+
+    let currentStreak = user.streak >= 7 ? 0 : user.streak;
+    const reward = set.checkInRewards[currentStreak];
     
-    const user = new User({ email, password: hashedPassword, deviceId, referralCode: myRefCode, refBy: refCode });
+    user.balance += reward;
+    user.streak = currentStreak + 1;
+    user.lastCheckIn = now;
     await user.save();
-    res.json({ userId: user._id, msg: "Signup Success!" });
+    res.json({ msg: `Mubarak! ₹${reward} mile`, balance: user.balance, streak: user.streak });
 });
 
-app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user || !await bcrypt.compare(password, user.password)) return res.status(400).json({ msg: "Invalid Login!" });
-    res.json({ userId: user._id, balance: user.balance });
-});
+// 2. Withdrawal (Once per 24h)
+app.post('/api/user/withdraw', async (req, res) => {
+    const { userId, amount } = req.body;
+    const user = await User.findById(userId);
+    const now = new Date();
 
-// --- ADMIN APIs ---
-app.post('/api/admin/update-settings', async (req, res) => {
-    await Settings.findOneAndUpdate({}, req.body, { upsert: true });
-    res.json({ success: true });
-});
+    if(user.lastWithdrawDate && (now - user.lastWithdrawDate) < 86400000) {
+        return res.status(400).json({ msg: "Din mein sirf ek bar withdraw kar sakte hain." });
+    }
+    if(user.balance < amount) return res.status(400).json({ msg: "Balance kam hai!" });
 
-app.get('/api/admin/all-withdraws', async (req, res) => {
-    const list = await Withdraw.find().sort({ date: -1 });
-    res.json(list);
-});
-
-app.post('/api/admin/approve-withdraw', async (req, res) => {
-    const { id, txnId, status } = req.body;
-    await Withdraw.findByIdAndUpdate(id, { txnId, status });
-    res.json({ success: true });
+    const w = new Withdraw({ userId, email: user.email, amount });
+    user.balance -= amount;
+    user.lastWithdrawDate = now;
+    await w.save();
+    await user.save();
+    res.json({ msg: "Request bheji gayi!" });
 });
 
 app.listen(process.env.PORT || 5000);
