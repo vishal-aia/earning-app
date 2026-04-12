@@ -1,81 +1,78 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect(process.env.MONGO_URI).then(() => console.log("Pro DB Connected"));
+mongoose.connect(process.env.MONGO_URI).then(() => console.log("Enterprise System Live"));
 
-// --- Database Schema ---
-const UserSchema = new mongoose.Schema({
-    email: { type: String, unique: true },
-    balance: { type: Number, default: 0 },
-    deviceId: { type: String, unique: true },
-    lastCheckIn: Date,
-    checkInStreak: { type: Number, default: 0 },
-    lastTaskTime: Date,
-    isBlocked: { type: Boolean, default: false }
-});
-const User = mongoose.model('User', UserSchema);
-
-const SettingsSchema = new mongoose.Schema({
-    checkInRewards: { type: Array, default: [1, 2, 3, 4, 5, 6, 10] }, // 7 days
-    spinProbabilities: { type: Array, default: [0.1, 0.5, 0, 1, 0, 0.2] },
-    taskTimer: { type: Number, default: 30 }, // Seconds
+// --- DATABASE MODELS ---
+const Settings = mongoose.model('Settings', new mongoose.Schema({
+    checkInReward: { type: Array, default: [1, 1, 2, 2, 3, 3, 5] },
+    smartlinkReward: { type: Number, default: 0.5 },
     minWithdraw: { type: Number, default: 100 },
-    adLink: String
-});
-const Settings = mongoose.model('Settings', SettingsSchema);
+    adLink: { type: String, default: "https://google.com" },
+    taskTimer: { type: Number, default: 30 },
+    referralBonus: { type: Number, default: 5 }
+}));
 
-// --- APIs ---
+const User = mongoose.model('User', new mongoose.Schema({
+    email: { type: String, unique: true },
+    password: { type: String },
+    deviceId: { type: String, unique: true },
+    balance: { type: Number, default: 0 },
+    refBy: String,
+    referralCode: { type: String, unique: true },
+    isBlocked: { type: Boolean, default: false },
+    lastTaskAt: Date
+}));
 
-// 1. Daily Check-in Logic (7-Day Reset)
-app.post('/api/earn/checkin', async (req, res) => {
-    const { userId } = req.body;
-    const user = await User.findById(userId);
-    const settings = await Settings.findOne();
+const Withdraw = mongoose.model('Withdraw', new mongoose.Schema({
+    userId: String, email: String, amount: Number, method: String,
+    status: { type: String, default: 'Pending' }, txnId: String, date: { type: Date, default: Date.now }
+}));
+
+// --- AUTH APIs ---
+app.post('/api/auth/signup', async (req, res) => {
+    const { email, password, deviceId, refCode } = req.body;
+    const exists = await User.findOne({ $or: [{ email }, { deviceId }] });
+    if (exists) return res.status(400).json({ msg: "Email or Device already registered!" });
     
-    const now = new Date();
-    if (user.lastCheckIn && user.lastCheckIn.toDateString() === now.toDateString()) {
-        return res.status(400).json({ msg: "Aaj ka reward le liya hai!" });
-    }
-
-    let day = user.checkInStreak % 7;
-    let reward = settings.checkInRewards[day];
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const myRefCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     
-    user.balance += reward;
-    user.checkInStreak += 1;
-    user.lastCheckIn = now;
+    const user = new User({ email, password: hashedPassword, deviceId, referralCode: myRefCode, refBy: refCode });
     await user.save();
-    
-    res.json({ msg: `Day ${day+1} Reward Recieved: ₹${reward}`, balance: user.balance });
-});
-
-// 2. Task Validation (Timer System)
-app.post('/api/earn/start-task', async (req, res) => {
-    const { userId } = req.body;
-    const user = await User.findById(userId);
-    user.lastTaskTime = new Date();
-    await user.save();
-    res.json({ msg: "Task Started" });
+    res.json({ userId: user._id, msg: "Signup Success!" });
 });
 
-app.post('/api/earn/claim-task', async (req, res) => {
-    const { userId } = req.body;
-    const user = await User.findById(userId);
-    const settings = await Settings.findOne();
+app.post('/api/auth/login', async (req, res) => {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user || !await bcrypt.compare(password, user.password)) return res.status(400).json({ msg: "Invalid Login!" });
+    res.json({ userId: user._id, balance: user.balance });
+});
 
-    const timePassed = (new Date() - user.lastTaskTime) / 1000;
-    if (timePassed < settings.taskTimer) {
-        return res.status(400).json({ msg: "Cheat mat karo! Ad poora dekho." });
-    }
+// --- ADMIN APIs ---
+app.post('/api/admin/update-settings', async (req, res) => {
+    await Settings.findOneAndUpdate({}, req.body, { upsert: true });
+    res.json({ success: true });
+});
 
-    user.balance += 0.5; // Example reward
-    await user.save();
-    res.json({ msg: "₹0.50 Added!", balance: user.balance });
+app.get('/api/admin/all-withdraws', async (req, res) => {
+    const list = await Withdraw.find().sort({ date: -1 });
+    res.json(list);
+});
+
+app.post('/api/admin/approve-withdraw', async (req, res) => {
+    const { id, txnId, status } = req.body;
+    await Withdraw.findByIdAndUpdate(id, { txnId, status });
+    res.json({ success: true });
 });
 
 app.listen(process.env.PORT || 5000);
