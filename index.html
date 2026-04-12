@@ -3,165 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarnMaster Pro | Bharat's No.1 Platform</title>
     
     <!-- ADVANCED SEO -->
-    <title>EarnMaster Pro | No.1 Earning Platform in India</title>
-    <meta name="description" content="EarnMaster Pro par daily tasks poore karein aur real cash kamayein. Trusted, Secure aur Fast Payouts. Join karein aur aaj hi kamayi shuru karein.">
-    <meta name="keywords" content="earning app, make money online, work from home, daily rewards, adsterra earning, real cash app">
+    <meta name="description" content="EarnMaster Pro par daily tasks poore karein aur real cash kamayein. Google Verified & Secure payouts.">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="PASTE_YOUR_VERCEL_URL_HERE">
-    
-    <!-- Open Graph (FB/WA) -->
-    <meta property="og:title" content="EarnMaster Pro - Daily Reward Platform">
-    <meta property="og:description" content="Join EarnMaster Pro and earn ₹500 daily.">
-    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/2331/2331941.png">
-    
-    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4f46e5">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
-        body { font-family: 'Poppins', sans-serif; background: #f8fafc; overflow-x: hidden; }
-        .screen { display: none; }
-        .active-screen { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .nav-active { color: #4f46e5; transform: translateY(-5px); transition: 0.3s; }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap');
+        body { font-family: 'Outfit', sans-serif; background: #f0f4f8; }
+        .premium-card { background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); }
+        .toast { transform: translateY(100px); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .toast.show { transform: translateY(0); }
     </style>
 </head>
-<body class="max-w-md mx-auto bg-white shadow-2xl min-h-screen">
+<body class="max-w-md mx-auto min-h-screen bg-white shadow-2xl relative overflow-hidden">
 
-    <!-- 1. AUTH SCREENS (Login/Signup) -->
-    <section id="authScreen" class="screen p-8 pt-20">
-        <div id="loginBox" class="">
-            <h1 class="text-4xl font-black text-indigo-600 mb-2">Welcome!</h1>
-            <p class="text-gray-400 text-sm mb-10">Login to start earning.</p>
-            <input id="lEmail" type="email" placeholder="Email" class="w-full p-4 bg-gray-50 rounded-2xl border mb-4 outline-none">
-            <input id="lPass" type="password" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl border mb-6 outline-none">
-            <button onclick="login()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-lg mb-4">LOGIN</button>
-            <p class="text-center text-sm">Naya account? <span onclick="toggleAuth()" class="text-indigo-600 font-bold cursor-pointer">Register</span></p>
+    <!-- Custom Toast (No more vercel.app alerts) -->
+    <div id="customToast" class="toast fixed bottom-24 left-4 right-4 bg-gray-900 text-white p-4 rounded-2xl flex items-center gap-3 z-[999] shadow-2xl">
+        <div id="toastIcon" class="bg-indigo-500 p-2 rounded-lg text-sm">✨</div>
+        <p id="toastMsg" class="text-sm font-bold"></p>
+    </div>
+
+    <!-- UI Header -->
+    <header class="premium-card p-8 text-white rounded-b-[3.5rem] shadow-2xl">
+        <div class="flex justify-between items-center mb-10">
+            <h1 class="text-2xl font-black tracking-tighter italic text-white/90">EARN<span class="text-yellow-300">MASTER</span></h1>
+            <div class="bg-white/20 p-2 rounded-full"><i class="fa-solid fa-user-shield"></i></div>
+        </div>
+        <div class="text-center">
+            <p class="text-[10px] text-white/70 uppercase font-black tracking-[3px] mb-2">Wallet Balance</p>
+            <h2 class="text-6xl font-black tracking-tight">₹<span id="userBal">0.00</span></h2>
+            <button onclick="showPage('withdraw')" class="mt-8 bg-white text-indigo-600 px-10 py-3 rounded-2xl font-black shadow-xl active:scale-95 transition-all text-sm uppercase">Withdraw Money</button>
+        </div>
+    </header>
+
+    <!-- Main Screens -->
+    <main class="p-5" id="main-content">
+        <!-- Dashboard Card -->
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 -mt-10 relative z-10 mb-6">
+            <h3 class="font-black text-gray-800 text-sm mb-4"><i class="fa-solid fa-calendar-check text-orange-500 mr-2"></i>7-Day Bonus Streak</h3>
+            <div class="grid grid-cols-7 gap-2 mb-4" id="streakGrid"></div>
+            <button onclick="claimCheckin()" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-black text-xs uppercase shadow-lg shadow-orange-200 active:scale-95 transition-all">Claim Daily Bonus</button>
         </div>
 
-        <div id="signupBox" class="hidden">
-            <h1 class="text-4xl font-black text-indigo-600 mb-2">Join Us!</h1>
-            <p class="text-gray-400 text-sm mb-10">Create account in 1 minute.</p>
-            <input id="sEmail" type="email" placeholder="Email Address" class="w-full p-4 bg-gray-50 rounded-2xl border mb-4 outline-none">
-            <input id="sPass" type="password" placeholder="Password" class="w-full p-4 bg-gray-50 rounded-2xl border mb-4 outline-none">
-            <input id="sRef" type="text" placeholder="Referral Code (Optional)" class="w-full p-4 bg-gray-50 rounded-2xl border mb-6 outline-none">
-            <button onclick="signup()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-lg mb-4">SIGN UP</button>
-            <p class="text-center text-sm">Account hai? <span onclick="toggleAuth()" class="text-indigo-600 font-bold cursor-pointer">Login</span></p>
+        <div class="space-y-4" id="taskList">
+            <!-- Tasks dynamically loaded from Admin -->
         </div>
-    </section>
+    </main>
 
-    <!-- 2. MAIN DASHBOARD -->
-    <section id="dashboardScreen" class="screen">
-        <header class="bg-slate-900 p-8 text-white rounded-b-[3rem] shadow-xl relative overflow-hidden">
-            <div class="flex justify-between items-center mb-6 relative z-10">
-                <h1 class="text-xl font-black italic tracking-tighter">EARN<span class="text-indigo-400">MASTER</span></h1>
-                <button onclick="logout()" class="text-xs bg-white/10 px-3 py-1 rounded-full"><i class="fa-solid fa-power-off"></i></button>
-            </div>
-            <div class="text-center relative z-10">
-                <p class="text-[10px] text-indigo-300 uppercase font-bold tracking-widest">Main Wallet Balance</p>
-                <h2 class="text-5xl font-black mt-1">₹<span id="uBal">0.00</span></h2>
-            </div>
-            <i class="fa-solid fa-wallet absolute -right-4 -bottom-4 text-8xl opacity-10"></i>
-        </header>
-
-        <main class="p-5 space-y-6">
-            <!-- Tasks -->
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
-                <h3 class="font-bold text-gray-800 mb-4 text-sm">🔥 Exclusive Tasks</h3>
-                <div onclick="startSmartlink()" class="flex justify-between items-center p-4 bg-indigo-50 rounded-2xl cursor-pointer">
-                    <div class="flex items-center gap-4">
-                        <div class="bg-indigo-600 text-white p-3 rounded-xl"><i class="fa-solid fa-bolt"></i></div>
-                        <div>
-                            <p class="font-bold text-sm">Smartlink Task</p>
-                            <p id="tTimer" class="text-[10px] text-gray-400 font-bold">REWARD: ₹0.50 | 30S</p>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-play text-indigo-600"></i>
-                </div>
-            </div>
-
-            <!-- More Tabs (Withdraw, Refer) handled by JS -->
-        </main>
-    </section>
-
-    <!-- 3. LEGAL PAGES (Privacy, Terms etc) -->
-    <section id="legalScreen" class="screen p-6">
-        <h2 class="text-2xl font-black mb-4">Legal Policy</h2>
-        <div class="text-gray-600 text-sm space-y-4" id="legalContent">
-            <p>Welcome to EarnMaster Pro. By using our site, you agree to our Terms & Conditions. We collect device IDs to prevent fraud and ensure your earnings are safe.</p>
-            <h4 class="font-bold">Privacy Policy</h4>
-            <p>We do not share your email with third parties. Your data is encrypted and secure.</p>
-        </div>
-        <button onclick="showPage('dashboardScreen')" class="mt-10 text-indigo-600 font-bold">← Back to Home</button>
-    </section>
-
-    <!-- Bottom Navigation -->
-    <nav id="bottomNav" class="fixed bottom-0 max-w-md w-full bg-white border-t p-4 flex justify-around rounded-t-[2.5rem] shadow-2xl hidden">
-        <button onclick="showPage('dashboardScreen')" class="nav-active flex flex-col items-center text-[10px] font-bold"><i class="fa-solid fa-house-chimney text-xl"></i>Home</button>
-        <button onclick="alert('Withdrawals open daily at 10 AM')" class="text-gray-400 flex flex-col items-center text-[10px] font-bold"><i class="fa-solid fa-wallet text-xl"></i>Wallet</button>
-        <button onclick="showPage('legalScreen')" class="text-gray-400 flex flex-col items-center text-[10px] font-bold"><i class="fa-solid fa-shield-halved text-xl"></i>Legal</button>
+    <!-- Navigation -->
+    <nav class="fixed bottom-0 max-w-md w-full bg-white/90 backdrop-blur-md border-t p-4 flex justify-around rounded-t-[2.5rem] shadow-2xl">
+        <button onclick="location.reload()" class="text-indigo-600 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-house-chimney text-xl"></i>Home</button>
+        <button onclick="showPage('wallet')" class="text-gray-400 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-wallet text-xl"></i>Wallet</button>
+        <button onclick="showPage('legal')" class="text-gray-400 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-shield-halved text-xl"></i>Privacy</button>
     </nav>
 
     <script>
-        // 🛑 IMPORTANT CONFIG
-        const backendUrl = "https://earn-hub-z1su.onrender.com"; 
+        const backendUrl = "PASTE_YOUR_RENDER_URL_HERE"; 
         
-        function showPage(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.getElementById(id).classList.add('active-screen');
-            if(id === 'dashboardScreen') document.getElementById('bottomNav').classList.remove('hidden');
-            else if(id === 'authScreen') document.getElementById('bottomNav').classList.add('hidden');
+        // Custom Toast Function
+        function showToast(msg, icon = "✨") {
+            const toast = document.getElementById('customToast');
+            document.getElementById('toastMsg').innerText = msg;
+            document.getElementById('toastIcon').innerText = icon;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // --- AUTH & CORE LOGIC ---
-        async function signup() {
-            const email = document.getElementById('sEmail').value;
-            const password = document.getElementById('sPass').value;
-            const refCode = document.getElementById('sRef').value;
-            const deviceId = localStorage.getItem('deviceId') || "dev_" + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('deviceId', deviceId);
-
-            const res = await fetch(`${backendUrl}/api/auth/signup`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ email, password, deviceId, refCode })
+        async function init() {
+            const res = await fetch(`${backendUrl}/api/settings`);
+            const s = await res.json();
+            // Streak Logic
+            const grid = document.getElementById('streakGrid');
+            s.checkInRewards.forEach((r, i) => {
+                grid.innerHTML += `<div class="aspect-square bg-slate-50 border rounded-xl flex flex-col items-center justify-center text-[8px] font-bold">
+                    <span class="text-gray-400 uppercase">Day ${i+1}</span>
+                    <span class="text-indigo-600">₹${r}</span>
+                </div>`;
             });
-            const data = await res.json();
-            if(res.ok) { alert("Registration Successful!"); location.reload(); }
-            else { alert(data.msg); }
+            showToast("Welcome to EarnMaster Pro!");
         }
 
-        async function login() {
-            const email = document.getElementById('lEmail').value;
-            const password = document.getElementById('lPass').value;
-            const res = await fetch(`${backendUrl}/api/auth/login`, {
+        async function claimCheckin() {
+            const userId = localStorage.getItem('userId');
+            const res = await fetch(`${backendUrl}/api/earn/checkin`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ userId })
             });
             const data = await res.json();
             if(res.ok) {
-                localStorage.setItem('userId', data.userId);
-                showPage('dashboardScreen');
-                loadUser();
-            } else { alert(data.msg); }
+                showToast(data.msg, "🎁");
+                document.getElementById('userBal').innerText = data.balance.toFixed(2);
+            } else {
+                showToast(data.msg, "⚠️");
+            }
         }
 
-        function toggleAuth() {
-            document.getElementById('loginBox').classList.toggle('hidden');
-            document.getElementById('signupBox').classList.toggle('hidden');
-        }
-
-        function logout() { localStorage.clear(); location.reload(); }
-
-        window.onload = () => {
-            if(localStorage.getItem('userId')) { showPage('dashboardScreen'); loadUser(); }
-            else showPage('authScreen');
-        };
+        window.onload = init;
     </script>
 </body>
 </html>
