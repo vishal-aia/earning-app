@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-   <url>
-      <!-- Yahan sirf aapki website ka main link aayega -->
-      <loc>https://apki-site.vercel.app/</loc>
-      <lastmod>2024-04-24</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1.0</priority>
-   </url>
-   <!-- Isse niche admin ka koi bhi link nahi hona chahiye -->
+  <url>
+    <loc>https://apki-site.vercel.app/</loc>
+    <lastmod>2024-04-24</lastmod>
+    <priority>1.0</priority>
+  </url>
 </urlset>
