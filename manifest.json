@@ -1,15 +1,9 @@
 {
-  "name": "EarnMaster App",
+  "name": "EarnMaster Pro",
   "short_name": "EarnMaster",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/2331/2331941.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2331/2331941.png", "sizes": "512x512", "type": "image/png" }]
 }
