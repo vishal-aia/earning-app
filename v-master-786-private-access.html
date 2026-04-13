@@ -2,89 +2,220 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enterprise Master Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MASTER CONTROL | Enterprise v4.0</title>
     <meta name="robots" content="noindex, nofollow">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+        body { font-family: 'Space Grotesk', sans-serif; background-color: #020617; }
+        .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
+        .hide { display: none; }
+        input:focus { border-color: #6366f1; box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
+    </style>
 </head>
-<body class="bg-slate-950 text-white p-8">
+<body class="text-slate-200 min-h-screen">
 
-    <!-- LOGIN SCREEN -->
-    <div id="login" class="fixed inset-0 bg-black flex items-center justify-center z-[999]">
-        <div class="bg-slate-900 p-10 rounded-[3rem] border border-slate-800 text-center w-80">
-            <h2 class="text-2xl font-black mb-8 text-indigo-500 tracking-tighter uppercase">Admin Login</h2>
-            <input id="pin" type="password" placeholder="PIN" class="w-full bg-black border border-slate-700 p-5 rounded-2xl text-center text-3xl font-bold mb-6">
-            <button onclick="checkPin()" class="w-full bg-indigo-600 p-5 rounded-2xl font-black shadow-xl shadow-indigo-900/20">ACCESS</button>
+    <!-- 🔐 6-DIGIT SECURE LOGIN -->
+    <div id="loginGate" class="fixed inset-0 z-[9999] bg-slate-950 flex items-center justify-center p-6">
+        <div class="w-full max-w-sm glass-card p-10 rounded-[3rem] text-center shadow-2xl">
+            <div class="h-20 w-20 bg-indigo-600/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-shield-halved text-4xl text-indigo-500"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-white mb-2 uppercase tracking-tighter">Master Access</h1>
+            <p class="text-slate-500 text-[10px] mb-8 uppercase tracking-[4px]">Enter 6-Digit Admin PIN</p>
+            
+            <input id="adminPin" type="password" maxlength="6" placeholder="••••••" class="w-full bg-slate-900 border border-slate-800 p-5 rounded-2xl text-center text-4xl font-black mb-6 outline-none transition-all tracking-[10px]">
+            
+            <button onclick="verifyAccess()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white p-5 rounded-2xl font-bold shadow-xl shadow-indigo-900/20 transition-all active:scale-95">UNSEAL CONTROL</button>
+            <p id="errorMsg" class="text-red-500 text-xs mt-4 hide">Invalid Credentials. Redirecting...</p>
         </div>
     </div>
 
-    <!-- MAIN PANEL -->
-    <div id="panel" class="hidden max-w-5xl mx-auto space-y-10">
-        <h1 class="text-4xl font-black italic text-white uppercase tracking-tighter">System Control Center</h1>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <!-- Task Manager -->
-            <div class="bg-slate-900 p-8 rounded-[3rem] border border-slate-800 space-y-6">
-                <h2 class="text-xl font-bold">Add New Task</h2>
-                <input id="tTitle" type="text" placeholder="Task Title" class="w-full bg-black p-4 rounded-xl">
-                <input id="tLink" type="text" placeholder="Adsterra/Smartlink Link" class="w-full bg-black p-4 rounded-xl">
-                <input id="tReward" type="number" placeholder="Reward ₹" class="w-full bg-black p-4 rounded-xl">
-                <button onclick="addTask()" class="w-full bg-indigo-600 p-4 rounded-xl font-bold">DEPLOY TASK</button>
+    <!-- 🚀 MAIN DASHBOARD -->
+    <div id="adminPanel" class="hide pb-24">
+        
+        <!-- Header -->
+        <header class="p-8 flex justify-between items-center border-b border-slate-800 bg-slate-950/50 sticky top-0 z-50 backdrop-blur-lg">
+            <div>
+                <h2 class="text-3xl font-black text-white italic tracking-tighter">PRO<span class="text-indigo-500">CONTROL</span></h2>
+                <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest"><i class="fa-solid fa-circle text-[8px] animate-pulse"></i> Server Live</p>
             </div>
-
-            <!-- Global Settings -->
-            <div class="bg-slate-900 p-8 rounded-[3rem] border border-slate-800 space-y-6">
-                <h2 class="text-xl font-bold">Global Settings</h2>
-                <div>
-                    <label class="text-[10px] text-slate-500 font-bold uppercase">7-Day Check-in Rewards</label>
-                    <input id="rewards" type="text" value="1,2,3,5,10,15,30" class="w-full bg-black mt-2 p-4 rounded-xl">
+            <div class="flex gap-4">
+                <button onclick="location.reload()" class="bg-slate-900 p-4 rounded-2xl border border-slate-800"><i class="fa-solid fa-arrows-rotate"></i></button>
+                <div class="bg-indigo-600/10 border border-indigo-500/30 px-6 py-2 rounded-2xl flex items-center gap-3">
+                    <span class="text-xs font-bold text-indigo-400">Owner</span>
+                    <div class="h-8 w-8 bg-indigo-500 rounded-full flex items-center justify-center font-bold">A</div>
                 </div>
-                <button onclick="saveSettings()" class="w-full bg-green-600 p-4 rounded-xl font-bold">UPDATE SETTINGS</button>
             </div>
-        </div>
+        </header>
 
-        <!-- Withdraw List -->
-        <div class="bg-slate-900 p-8 rounded-[3rem] border border-slate-800">
-            <h2 class="text-xl font-bold mb-6 italic">Withdrawal Manager</h2>
-            <div id="wList" class="space-y-4">
-                <p class="text-xs text-gray-500">Fetching requests...</p>
+        <div class="max-w-6xl mx-auto p-6 space-y-8">
+            
+            <!-- 🌐 RENDER URL CONFIG (HARDCODED) -->
+            <div class="glass-card p-6 rounded-[2.5rem]">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Connected Backend Engine</label>
+                <div class="flex gap-4 mt-3">
+                    <input id="rUrl" type="text" value="PASTE_YOUR_RENDER_URL_HERE" class="flex-1 bg-slate-950 border border-slate-800 p-4 rounded-2xl text-indigo-400 font-mono text-sm outline-none">
+                    <button onclick="saveLocalUrl()" class="bg-slate-800 px-6 rounded-2xl text-xs font-bold">Sync</button>
+                </div>
             </div>
+
+            <!-- 📊 STATS CARDS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-8 rounded-[2.5rem]">
+                    <p class="text-xs text-slate-500 font-bold uppercase">Total Registered Users</p>
+                    <h3 id="uCount" class="text-4xl font-black mt-2">Loading...</h3>
+                </div>
+                <div class="glass-card p-8 rounded-[2.5rem]">
+                    <p class="text-xs text-slate-500 font-bold uppercase">Pending Withdrawals</p>
+                    <h3 id="wCount" class="text-4xl font-black mt-2 text-orange-500 italic">0</h3>
+                </div>
+                <div class="glass-card p-8 rounded-[2.5rem]">
+                    <p class="text-xs text-slate-500 font-bold uppercase">Profit Analytics</p>
+                    <h3 class="text-4xl font-black mt-2 text-emerald-500">SAFE</h3>
+                </div>
+            </div>
+
+            <!-- 💸 REWARD CONTROLLER -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="glass-card p-10 rounded-[3rem] space-y-6">
+                    <h3 class="text-xl font-bold flex items-center gap-3"><i class="fa-solid fa-coins text-yellow-500"></i> Reward Manager</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">7-Day Check-in Cycle (₹)</label>
+                            <input id="checkinRewards" type="text" value="1,2,3,4,5,10,20" class="w-full bg-slate-950 p-4 rounded-2xl border border-slate-800 outline-none mt-2">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase">Min Withdraw (₹)</label>
+                                <input id="minWithdraw" type="number" value="100" class="w-full bg-slate-950 p-4 rounded-2xl border border-slate-800 mt-2">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase">Ref Bonus (₹)</label>
+                                <input id="refBonus" type="number" value="5" class="w-full bg-slate-950 p-4 rounded-2xl border border-slate-800 mt-2">
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="deploySettings()" class="w-full bg-indigo-600 p-5 rounded-2xl font-black shadow-lg shadow-indigo-900/40">APPLY CHANGES</button>
+                </div>
+
+                <!-- 📺 TASK DEPLOYER -->
+                <div class="glass-card p-10 rounded-[3rem] space-y-6">
+                    <h3 class="text-xl font-bold flex items-center gap-3"><i class="fa-solid fa-list-check text-blue-500"></i> Task Deployer</h3>
+                    
+                    <select id="tType" class="w-full bg-slate-950 p-4 rounded-2xl border border-slate-800 outline-none">
+                        <option value="AD">AD (Video/Smartlink with 30s Cooldown)</option>
+                        <option value="CPA">CPA (Direct App Install/Register)</option>
+                    </select>
+                    <input id="tTitle" type="text" placeholder="Task Name (e.g. Watch & Earn)" class="w-full bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="tReward" type="number" placeholder="Reward ₹" class="w-full bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                        <input id="tLink" type="text" placeholder="Link (Smartlink/App)" class="w-full bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                    </div>
+                    <button onclick="deployTask()" class="w-full bg-emerald-600 p-5 rounded-2xl font-black">DEPLOY TASK TO ALL USERS</button>
+                </div>
+            </div>
+
+            <!-- 🏦 WITHDRAWAL MANAGER -->
+            <div class="glass-card p-10 rounded-[3rem]">
+                <h3 class="text-xl font-bold mb-8">Pending UPI Withdrawals</h3>
+                <div id="wTable" class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-slate-500 text-[10px] uppercase tracking-widest border-b border-slate-800">
+                                <th class="pb-4 px-2">User Email</th>
+                                <th class="pb-4 px-2">UPI ID</th>
+                                <th class="pb-4 px-2">Amount</th>
+                                <th class="pb-4 px-2">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wList" class="text-sm">
+                            <!-- Requests will load here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        const MASTER_PIN = "2412"; // 🛑 CHANGE THIS PIN
-        const backendUrl = "https://earn-hub-z1su.onrender.com"; 
+        // 🛑 CONFIGURATION
+        const MASTER_PIN = "241204"; // 6-digit PIN
+        const defaultBackend = "https://earn-hub-z1su.onrender.com"; 
 
-        function checkPin() {
-            if(document.getElementById('pin').value === MASTER_PIN) {
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('panel').classList.remove('hidden');
+        function verifyAccess() {
+            const entered = document.getElementById('adminPin').value;
+            if (entered === MASTER_PIN) {
+                document.getElementById('loginGate').classList.add('hide');
+                document.getElementById('adminPanel').classList.remove('hide');
                 loadStats();
+            } else {
+                document.getElementById('errorMsg').classList.remove('hide');
+                setTimeout(() => location.reload(), 2000);
             }
         }
 
-        async function saveSettings() {
-            const data = {
-                checkInRewards: document.getElementById('rewards').value.split(',').map(Number)
-            };
-            await fetch(`${backendUrl}/api/admin/update-settings`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            alert("✅ Settings Synchronized!");
+        async function loadStats() {
+            const url = document.getElementById('rUrl').value || defaultBackend;
+            try {
+                const res = await fetch(`${url}/api/admin/stats`);
+                const data = await res.json();
+                document.getElementById('uCount').innerText = data.totalUsers;
+                document.getElementById('wCount').innerText = data.pendingWithdraws.length;
+                
+                // Load Withdraw List
+                const list = document.getElementById('wList');
+                list.innerHTML = "";
+                data.pendingWithdraws.forEach(w => {
+                    list.innerHTML += `
+                    <tr class="border-b border-slate-800/50 hover:bg-slate-900/30 transition-all">
+                        <td class="py-4 px-2">${w.email}</td>
+                        <td class="py-4 px-2 text-indigo-400 font-bold">${w.upiId || 'N/A'}</td>
+                        <td class="py-4 px-2 text-emerald-500 font-black">₹${w.amount}</td>
+                        <td class="py-4 px-2">
+                            <button onclick="approveW('${w._id}')" class="bg-emerald-600/20 text-emerald-500 px-4 py-1 rounded-lg border border-emerald-500/30 text-[10px] font-bold">MARK PAID</button>
+                        </td>
+                    </tr>`;
+                });
+            } catch (e) { console.log("Backend offline or URL wrong!"); }
         }
 
-        async function addTask() {
+        async function deploySettings() {
+            const url = document.getElementById('rUrl').value;
             const data = {
-                title: document.getElementById('tTitle').value,
-                link: document.getElementById('tLink').value,
-                reward: document.getElementById('tReward').value
+                checkInRewards: document.getElementById('checkinRewards').value.split(',').map(Number),
+                minWithdraw: document.getElementById('minWithdraw').value,
+                referralBonus: document.getElementById('refBonus').value
             };
-            await fetch(`${backendUrl}/api/admin/add-task`, {
+            const res = await fetch(`${url}/api/admin/update-settings`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
             });
-            alert("✅ Task Added!");
+            if(res.ok) alert("✅ SYSTEM SYNCHRONIZED: Rewards updated.");
+        }
+
+        async function deployTask() {
+            const url = document.getElementById('rUrl').value;
+            const data = {
+                type: document.getElementById('tType').value,
+                title: document.getElementById('tTitle').value,
+                reward: document.getElementById('tReward').value,
+                link: document.getElementById('tLink').value
+            };
+            await fetch(`${url}/api/admin/add-task`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            alert("✅ TASK DEPLOYED: Available to users now.");
+        }
+
+        function saveLocalUrl() {
+            alert("Local Sync Active!");
+            loadStats();
         }
     </script>
 </body>
