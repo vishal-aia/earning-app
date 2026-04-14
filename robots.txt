@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /v-master-786-private-access.html
-Sitemap: https://apki-site.vercel.app/sitemap.xml
+Sitemap: https://earninghub-iota.vercel.app/
