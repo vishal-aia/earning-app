@@ -9,25 +9,23 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect(process.env.MONGO_URI).then(() => console.log("Enterprise DB Connected"));
+// MongoDB Connection (Use your MONGO_URI in Render Environment)
+mongoose.connect(process.env.MONGO_URI).then(() => console.log("Earning Hub DB Connected"));
 
-// --- SCHEMAS ---
-const UserSchema = new mongoose.Schema({
+// --- MODELS ---
+const User = mongoose.model('User', new mongoose.Schema({
     email: { type: String, unique: true },
-    password: String,
+    password: { type: String },
     deviceId: { type: String, unique: true },
     balance: { type: Number, default: 0 },
     streak: { type: Number, default: 0 },
     lastCheckIn: Date,
-    referralCode: { type: String, unique: true },
-    isBlocked: { type: Boolean, default: false },
-    joinedAt: { type: Date, default: Date.now }
-});
-const User = mongoose.model('User', UserSchema);
+    lastWithdraw: Date,
+    referralCode: String
+}));
 
 const Task = mongoose.model('Task', new mongoose.Schema({
-    category: { type: String, enum: ['CPA', 'VIDEO'] },
-    title: String, desc: String, link: String, reward: Number, timer: Number
+    type: String, title: String, reward: Number, link: String, timer: Number
 }));
 
 const Withdraw = mongoose.model('Withdraw', new mongoose.Schema({
@@ -40,34 +38,40 @@ const Settings = mongoose.model('Settings', new mongoose.Schema({
     minWithdraw: { type: Number, default: 100 }
 }));
 
-// --- AUTH APIs ---
+// --- APIs ---
 app.post('/api/auth/signup', async (req, res) => {
     const { email, password, deviceId } = req.body;
     const exists = await User.findOne({ $or: [{ email }, { deviceId }] });
     if (exists) return res.status(400).json({ msg: "Email or Device already registered!" });
     const hashed = await bcrypt.hash(password, 10);
-    const code = "REF" + Math.floor(1000 + Math.random() * 9000);
-    const user = new User({ email, password: hashed, deviceId, referralCode: code });
+    const user = new User({ email, password: hashed, deviceId, referralCode: "EH"+Math.floor(1000+Math.random()*9000) });
     await user.save();
-    res.json({ msg: "Success" });
+    res.json({ msg: "Registration Successful" });
 });
 
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user || !await bcrypt.compare(password, user.password)) return res.status(400).json({ msg: "Invalid Login" });
-    const token = jwt.sign({ id: user._id }, "SECRET_KEY");
-    res.json({ token, userId: user._id });
+    res.json({ userId: user._id });
 });
 
-// --- ADMIN STATS ---
+app.get('/api/user/:id', async (req, res) => {
+    const user = await User.findById(req.params.id);
+    res.json(user);
+});
+
+app.get('/api/settings', async (req, res) => {
+    const s = await Settings.findOne();
+    const t = await Task.find();
+    res.json({ settings: s, tasks: t });
+});
+
 app.get('/api/admin/stats', async (req, res) => {
-    const totalUsers = await User.countDocuments();
-    const activeToday = await User.countDocuments({ lastCheckIn: { $gte: new Date().setHours(0,0,0,0) } });
-    const pendingW = await Withdraw.find({ status: 'Pending' });
-    const settings = await Settings.findOne();
-    const tasks = await Task.find();
-    res.json({ totalUsers, activeToday, pendingW, settings, tasks });
+    const u = await User.countDocuments();
+    const w = await Withdraw.find({ status: 'Pending' });
+    const s = await Settings.findOne();
+    res.json({ totalUsers: u, pendingWithdraws: w, settings: s });
 });
 
 app.listen(process.env.PORT || 5000);
