@@ -1,6 +1,6 @@
 {
-  "name": "EarnMaster Pro",
-  "short_name": "EarnMaster",
+  "name": "Earning hub",
+  "short_name": "Earning hub",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
