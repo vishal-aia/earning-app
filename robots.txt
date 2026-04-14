@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Allow: /index.html
 Disallow: /v-master-786-private-access.html
+
+# Sitemap link Google ko indexing mein help karega
 Sitemap: https://earninghub-iota.vercel.app/
