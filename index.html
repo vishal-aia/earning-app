@@ -3,116 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SikkaPro | Daily Rewards</title>
+    <title>Earning Hub | Bharat's Premium Money Earning Platform</title>
+    
+    <!-- ADVANCED SEO -->
+    <meta name="description" content="Earning Hub par rozana tasks aur videos dekh kar paise kamayein. Trusted UPI withdrawals aur daily rewards.">
+    <meta name="keywords" content="Earning Hub, online paise kamayein, daily checkin, upi withdrawal, real earning app">
+    <meta name="robots" content="index, follow">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap');
-        body { font-family: 'Outfit', sans-serif; background: #0f172a; color: white; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0f172a; color: white; }
         .screen { display: none; }
         .active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .task-card { background: #1e293b; border-radius: 20px; border: 1px solid #334155; }
-        .streak-dot { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 2px solid #334155; position: relative; }
-        .streak-dot.completed { background: #facc15; border-color: #facc15; color: #000; }
-        .streak-line { flex-grow: 1; height: 2px; background: #334155; }
-        .streak-line.completed { background: #facc15; }
+        .card { background: #1e293b; border-radius: 24px; border: 1px solid #334155; }
+        .streak-dot { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 2px solid #334155; }
+        .streak-dot.active { background: #fbbf24; border-color: #fbbf24; color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
+        .toast { position: fixed; bottom: 100px; left: 20px; right: 20px; background: #1e293b; padding: 15px; border-radius: 15px; border: 1px solid #fbbf24; z-index: 9999; transform: translateY(200px); transition: 0.5s; }
+        .toast.show { transform: translateY(0); }
     </style>
 </head>
 <body class="max-w-md mx-auto min-h-screen relative shadow-2xl bg-slate-950">
 
-    <!-- Auth Screen -->
-    <div id="authPage" class="screen p-8 pt-20 active">
-        <h1 class="text-4xl font-black text-yellow-400 mb-2 italic uppercase">Earning<span class="text-white">Hub</span></h1>
-        <p class="text-slate-400 text-sm mb-10 uppercase tracking-widest">Digital Earning Platform</p>
+    <!-- Custom Pro Toast -->
+    <div id="toast" class="toast flex items-center gap-3">
+        <span class="text-xl">💰</span>
+        <p id="toastMsg" class="text-sm font-bold"></p>
+    </div>
+
+    <!-- 1. AUTH SCREEN -->
+    <div id="authPage" class="screen p-8 pt-20">
+        <h1 class="text-4xl font-black text-amber-400 mb-2 italic tracking-tighter uppercase">Earning<span class="text-white">Hub</span></h1>
+        <p class="text-slate-500 text-xs mb-12 uppercase tracking-widest">Premium Rewards Platform</p>
+        
         <div id="loginForm" class="space-y-4">
-            <input id="lEmail" type="email" placeholder="Email Address" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none focus:border-yellow-400">
-            <input id="lPass" type="password" placeholder="Password" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none focus:border-yellow-400">
-            <button onclick="login()" class="w-full bg-yellow-400 text-black font-black py-4 rounded-2xl shadow-xl shadow-yellow-400/10">LOGIN</button>
-            <p class="text-center text-xs">Naye hain? <span onclick="toggleAuth()" class="text-yellow-400 font-bold cursor-pointer">Account Banayein</span></p>
+            <input id="lEmail" type="email" placeholder="Email Address" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none focus:border-amber-400">
+            <input id="lPass" type="password" placeholder="Password" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none focus:border-amber-400">
+            <button onclick="login()" class="w-full bg-amber-400 text-black font-black py-4 rounded-2xl shadow-xl">LOG IN</button>
+            <p class="text-center text-xs">Account nahi hai? <span onclick="toggleAuth()" class="text-amber-400 font-bold cursor-pointer">Sign Up</span></p>
+        </div>
+
+        <div id="signupForm" class="hidden space-y-4">
+            <input id="sEmail" type="email" placeholder="Email Address" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none">
+            <input id="sPass" type="password" placeholder="Set Password" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none">
+            <button onclick="signup()" class="w-full bg-amber-400 text-black font-black py-4 rounded-2xl shadow-xl">SIGN UP</button>
+            <p class="text-center text-xs">Pehle se account hai? <span onclick="toggleAuth()" class="text-amber-400 font-bold cursor-pointer">Log In</span></p>
         </div>
     </div>
 
-    <!-- Home Screen -->
-    <div id="homePage" class="screen">
-        <header class="p-6 flex justify-between items-center sticky top-0 bg-slate-950/80 backdrop-blur-md z-50">
-            <h2 class="text-xl font-black italic">Earning hub</h2>
-            <div class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-2xl flex items-center gap-2">
-                <i class="fa-solid fa-coins text-yellow-400"></i>
-                <span id="bal" class="font-bold">0.00</span>
+    <!-- 2. HOME SCREEN -->
+    <div id="homePage" class="screen pb-24">
+        <header class="p-6 flex justify-between items-center sticky top-0 bg-slate-950/90 backdrop-blur-lg z-50">
+            <h2 class="text-xl font-black italic">EARNING HUB</h2>
+            <div class="bg-amber-400 text-black px-4 py-1.5 rounded-full font-black text-sm flex items-center gap-2">
+                <i class="fa-solid fa-wallet"></i> ₹<span id="topBal">0.00</span>
             </div>
         </header>
 
         <main class="p-4 space-y-6">
-            <!-- Microsoft Rewards Style Streak -->
-            <div class="task-card p-5">
+            <!-- Visual Streak (Microsoft Style) -->
+            <div class="card p-6">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-sm">Check-in Streak</h3>
-                    <span class="text-[10px] text-yellow-400 font-bold uppercase tracking-tighter">Day <span id="streakNum">1</span>/7</span>
+                    <h3 class="font-bold text-sm">7-Day Streak Bonus</h3>
+                    <span id="streakText" class="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-amber-400 font-bold">DAY 1</span>
                 </div>
-                <div class="flex items-center justify-between px-2" id="streakVisual">
-                    <!-- Dots will be generated here -->
+                <div class="flex justify-between items-center px-2" id="streakGrid">
+                    <!-- Dots generated by JS -->
                 </div>
-                <button onclick="claimCheckin()" class="w-full mt-6 bg-yellow-400 text-black py-3 rounded-xl font-black text-xs uppercase shadow-lg shadow-yellow-400/20">Claim Today's Reward</button>
-            </div>
-
-            <!-- Extra Earning Section -->
-            <div onclick="showPage('videoPage')" class="bg-gradient-to-r from-yellow-400 to-orange-500 p-6 rounded-3xl text-black flex justify-between items-center cursor-pointer shadow-lg active:scale-95 transition-all">
-                <div>
-                    <h3 class="font-black text-lg italic uppercase">Extra Earning</h3>
-                    <p class="text-[10px] font-bold opacity-80 uppercase">Watch Videos & Smartlinks</p>
-                </div>
-                <i class="fa-solid fa-circle-play text-3xl"></i>
+                <button onclick="claimCheckin()" class="w-full mt-8 bg-amber-400 text-black py-4 rounded-2xl font-black text-xs uppercase shadow-lg shadow-amber-400/20">Claim Reward</button>
             </div>
 
             <!-- CPA Tasks -->
-            <h3 class="font-black text-gray-400 text-xs uppercase ml-2 tracking-widest">Offers & Apps</h3>
+            <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest ml-2">CPA Offers (Direct)</h3>
             <div id="cpaTasks" class="space-y-3">
-                <!-- Task Cards will load from Admin -->
+                <!-- Task Cards -->
+            </div>
+
+            <!-- Video Section -->
+            <div onclick="showPage('videoPage')" class="bg-gradient-to-r from-amber-400 to-orange-500 p-6 rounded-3xl text-black flex justify-between items-center shadow-lg active:scale-95 transition-all">
+                <div>
+                    <h3 class="font-black text-lg italic uppercase">Extra Earning</h3>
+                    <p class="text-[10px] font-bold opacity-80 uppercase">Smartlinks & Video Ads</p>
+                </div>
+                <i class="fa-solid fa-play-circle text-3xl"></i>
             </div>
         </main>
     </div>
 
-    <!-- Navigation -->
-    <nav id="nav" class="fixed bottom-0 max-w-md w-full bg-slate-900/90 border-t border-slate-800 p-4 flex justify-around rounded-t-[2.5rem] hidden">
-        <button onclick="showPage('homePage')" class="text-yellow-400 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-house-chimney text-xl"></i>Home</button>
+    <!-- 3. WALLET / WITHDRAW SCREEN -->
+    <div id="walletPage" class="screen p-6">
+        <h2 class="text-3xl font-black mb-8">Wallet</h2>
+        <div class="card p-8 bg-slate-900 mb-8">
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Main Balance</p>
+            <h3 class="text-5xl font-black mt-2">₹<span id="wallBal">0.00</span></h3>
+        </div>
+        
+        <div class="space-y-4">
+            <input id="upi" type="text" placeholder="UPI ID (example@upi)" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none">
+            <input id="wAmt" type="number" placeholder="Amount (Min ₹100)" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none">
+            <button onclick="withdraw()" class="w-full bg-green-500 text-black font-black py-4 rounded-2xl">WITHDRAW TO UPI</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav id="navbar" class="fixed bottom-0 max-w-md w-full bg-slate-900/95 border-t border-slate-800 p-5 flex justify-around rounded-t-[2.5rem] shadow-2xl hidden">
+        <button onclick="showPage('homePage')" class="text-amber-400 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-house-chimney text-xl"></i>Home</button>
         <button onclick="showPage('walletPage')" class="text-slate-500 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-wallet text-xl"></i>Wallet</button>
-        <button onclick="showPage('referPage')" class="text-slate-500 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-users text-xl"></i>Refer</button>
+        <button onclick="logout()" class="text-slate-500 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-power-off text-xl"></i>Logout</button>
     </nav>
 
     <script>
         const backendUrl = "https://earn-hub-z1su.onrender.com"; 
         
-        async function loadStreak(streak) {
-            const container = document.getElementById('streakVisual');
-            container.innerHTML = "";
-            for(let i=1; i<=7; i++) {
-                const active = i <= streak ? "completed" : "";
-                container.innerHTML += `<div class="streak-dot ${active}">${i < streak ? '✓' : i}</div>`;
-                if(i < 7) container.innerHTML += `<div class="streak-line ${i < streak ? 'completed' : ''}"></div>`;
-            }
+        function toast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        async function signup() {
+            const email = document.getElementById('sEmail').value;
+            const password = document.getElementById('sPass').value;
+            const deviceId = localStorage.getItem('deviceId') || "EH_" + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('deviceId', deviceId);
+
+            const res = await fetch(`${backendUrl}/api/auth/signup`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email, password, deviceId })
+            });
+            const d = await res.json();
+            if(res.ok) { toast("Signup Successful!"); toggleAuth(); }
+            else { toast(d.msg); }
         }
 
         async function login() {
             const email = document.getElementById('lEmail').value;
             const password = document.getElementById('lPass').value;
             const res = await fetch(`${backendUrl}/api/auth/login`, {
-                method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({email, password})
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email, password })
             });
             const d = await res.json();
             if(res.ok) {
                 localStorage.setItem('userId', d.userId);
                 location.reload();
-            } else { alert(d.msg); }
+            } else { toast(d.msg); }
+        }
+
+        function toggleAuth() {
+            document.getElementById('loginForm').classList.toggle('hidden');
+            document.getElementById('signupForm').classList.toggle('hidden');
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
 
         window.onload = () => {
             if(localStorage.getItem('userId')) {
-                document.getElementById('authPage').classList.remove('active');
-                document.getElementById('homePage').classList.add('active');
-                document.getElementById('nav').classList.remove('hidden');
-                loadStreak(1); // Default
+                showPage('homePage');
+                document.getElementById('navbar').classList.remove('hidden');
+                loadData();
+            } else {
+                showPage('authPage');
             }
         }
     </script>
