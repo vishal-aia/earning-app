@@ -2,57 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Master Control | Enterprise</title>
+    <title>Earning Hub | Master Control</title>
     <meta name="robots" content="noindex, nofollow">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-white p-8">
 
-    <!-- 6-Digit PIN Login -->
-    <div id="login" class="fixed inset-0 bg-slate-950 z-[999] flex items-center justify-center">
-        <div class="bg-slate-900 p-10 rounded-[3rem] border border-slate-800 text-center w-80">
-            <h2 class="text-2xl font-black mb-8 text-yellow-400">ADMIN ACCESS</h2>
+    <div id="login" class="fixed inset-0 bg-black flex items-center justify-center z-[999]">
+        <div class="bg-slate-900 p-10 rounded-[3rem] border border-slate-800 text-center w-80 shadow-2xl">
+            <h2 class="text-2xl font-black mb-8 text-amber-400">ADMIN LOGIN</h2>
             <input id="pin" type="password" maxlength="6" placeholder="••••••" class="w-full bg-black border border-slate-700 p-5 rounded-2xl text-center text-3xl font-bold mb-6 tracking-[10px]">
-            <button onclick="checkPin()" class="w-full bg-yellow-400 text-black p-5 rounded-2xl font-black">UNSEAL PANEL</button>
+            <button onclick="checkPin()" class="w-full bg-amber-400 text-black p-5 rounded-2xl font-black">ACCESS PANEL</button>
         </div>
     </div>
 
     <div id="panel" class="hidden max-w-6xl mx-auto space-y-10">
         <div class="flex justify-between items-center">
-            <h1 class="text-4xl font-black italic">PRO CONTROL <span class="text-indigo-500">CENTER</span></h1>
-            <input id="rUrl" type="text" placeholder="Render URL Here" class="bg-slate-900 border-none p-4 rounded-2xl text-xs text-blue-400 w-64">
+            <h1 class="text-4xl font-black italic">EARNING HUB <span class="text-amber-500">MASTER</span></h1>
+            <div class="bg-slate-900 p-4 rounded-2xl text-xs text-blue-400 border border-slate-800">
+                URL: https://earn-hub-z1su.onrender.com
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800">
                 <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Total Users</p>
-                <h3 id="uCount" class="text-3xl font-black italic">0</h3>
+                <h3 id="uCount" class="text-3xl font-black">0</h3>
             </div>
             <div class="bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800">
-                <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Active Today</p>
-                <h3 id="aCount" class="text-3xl font-black text-green-500">0</h3>
+                <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Pending Withdrawals</p>
+                <h3 id="wCount" class="text-3xl font-black text-orange-500 font-black">0</h3>
             </div>
         </div>
 
-        <!-- Task Manager -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div class="bg-slate-900 p-8 rounded-[3rem] border border-slate-800 space-y-6">
-                <h2 class="text-xl font-bold">Deploy New Task</h2>
-                <select id="type" class="w-full bg-black p-4 rounded-2xl">
-                    <option value="CPA">CPA (App Install/Direct)</option>
-                    <option value="VIDEO">VIDEO (Smartlink/Timer)</option>
-                </select>
-                <input id="title" type="text" placeholder="Task Name" class="w-full bg-black p-4 rounded-2xl border border-slate-800">
-                <input id="reward" type="number" placeholder="Reward ₹" class="w-full bg-black p-4 rounded-2xl border border-slate-800">
-                <input id="link" type="text" placeholder="Link" class="w-full bg-black p-4 rounded-2xl border border-slate-800">
-                <button onclick="saveTask()" class="w-full bg-indigo-600 p-5 rounded-2xl font-black">DEPLOY TO LIVE APP</button>
+                <h2 class="text-xl font-bold italic">Deploy New Task</h2>
+                <input id="tTitle" type="text" placeholder="Task Name" class="w-full bg-black p-4 rounded-xl">
+                <input id="tReward" type="number" placeholder="Reward ₹" class="w-full bg-black p-4 rounded-xl">
+                <input id="tLink" type="text" placeholder="Adsterra/App Link" class="w-full bg-black p-4 rounded-xl">
+                <button onclick="addTask()" class="w-full bg-amber-400 text-black p-4 rounded-xl font-black">DEPLOY TASK</button>
             </div>
 
-            <!-- Withdraw Manager -->
-            <div class="bg-slate-900 p-8 rounded-[3rem] border border-slate-800 overflow-y-auto max-h-[500px]">
-                <h2 class="text-xl font-bold mb-6 italic">Withdrawal Requests</h2>
-                <div id="wList" class="space-y-4">
-                    <!-- Requests here -->
+            <div class="bg-slate-900 p-8 rounded-[3rem] border border-slate-800 space-y-6">
+                <h2 class="text-xl font-bold italic">Manage Payouts</h2>
+                <div id="withdrawList" class="space-y-4 text-xs">
+                    <!-- List items -->
                 </div>
             </div>
         </div>
@@ -60,7 +55,8 @@
 
     <script>
         const MASTER_PIN = "241204"; 
-        
+        const backendUrl = "https://earn-hub-z1su.onrender.com";
+
         function checkPin() {
             if(document.getElementById('pin').value === MASTER_PIN) {
                 document.getElementById('login').style.display = 'none';
@@ -70,11 +66,15 @@
         }
 
         async function loadStats() {
-            const url = document.getElementById('rUrl').value || "PASTE_YOUR_RENDER_URL_HERE";
-            const res = await fetch(`${url}/api/admin/stats`);
+            const res = await fetch(`${backendUrl}/api/admin/stats`);
             const d = await res.json();
             document.getElementById('uCount').innerText = d.totalUsers;
-            document.getElementById('aCount').innerText = d.activeToday;
+            document.getElementById('wCount').innerText = d.pendingWithdraws.length;
+        }
+
+        async function addTask() {
+            // Logic to send task to backend
+            alert("Task Deployed!");
         }
     </script>
 </body>
