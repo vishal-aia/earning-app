@@ -1,80 +1,190 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Earning Hub | Master Control</title>
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarningHub Admin - Private Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-950 text-white p-8">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <div id="login" class="fixed inset-0 bg-black flex items-center justify-center z-[999]">
-        <div class="bg-slate-900 p-10 rounded-[3rem] border border-slate-800 text-center w-80 shadow-2xl">
-            <h2 class="text-2xl font-black mb-8 text-amber-400">ADMIN LOGIN</h2>
-            <input id="pin" type="password" maxlength="6" placeholder="••••••" class="w-full bg-black border border-slate-700 p-5 rounded-2xl text-center text-3xl font-bold mb-6 tracking-[10px]">
-            <button onclick="checkPin()" class="w-full bg-amber-400 text-black p-5 rounded-2xl font-black">ACCESS PANEL</button>
+    <style>
+        body { background-color: #020617; color: white; font-family: 'Inter', sans-serif; }
+        .admin-card { background: #0f172a; border: 1px solid rgba(255,255,255,0.05); }
+        .input-box { background: #1e293b; border: 1px solid #334155; padding: 10px; border-radius: 8px; width: 100%; color: white; outline: none; }
+        .status-paid { color: #22c55e; }
+        .status-pending { color: #eab308; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. LOGIN SCREEN (Hidden URL ke baad bhi Password Security) -->
+    <div id="admin-login" class="fixed inset-0 bg-slate-950 z-[1000] flex items-center justify-center p-6">
+        <div class="max-w-md w-full bg-slate-900 p-8 rounded-3xl border border-blue-500/30 text-center">
+            <i class="fas fa-user-shield text-5xl text-blue-500 mb-4"></i>
+            <h1 class="text-2xl font-bold mb-6">Admin Access Only</h1>
+            <input type="password" id="admin-pass" placeholder="Enter Master Password" class="input-box text-center mb-4">
+            <button onclick="loginAdmin()" class="w-full bg-blue-600 py-3 rounded-xl font-bold hover:bg-blue-700">UNLOCK PANEL</button>
         </div>
     </div>
 
-    <div id="panel" class="hidden max-w-6xl mx-auto space-y-10">
-        <div class="flex justify-between items-center">
-            <h1 class="text-4xl font-black italic">EARNING HUB <span class="text-amber-500">MASTER</span></h1>
-            <div class="bg-slate-900 p-4 rounded-2xl text-xs text-blue-400 border border-slate-800">
-                URL: https://earn-hub-z1su.onrender.com
-            </div>
-        </div>
+    <!-- 2. MAIN ADMIN DASHBOARD -->
+    <div id="admin-panel" class="hidden min-h-screen">
+        <!-- Sidebar/Topnav -->
+        <nav class="bg-slate-900 p-4 border-b border-white/5 flex justify-between items-center">
+            <h2 class="text-xl font-black text-blue-500">CONTROL CENTER v1.0</h2>
+            <button onclick="location.reload()" class="bg-red-500/20 text-red-500 px-4 py-1 rounded-lg text-sm font-bold">LOGOUT</button>
+        </nav>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800">
-                <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Total Users</p>
-                <h3 id="uCount" class="text-3xl font-black">0</h3>
-            </div>
-            <div class="bg-slate-900 p-8 rounded-[2.5rem] border border-slate-800">
-                <p class="text-[10px] text-slate-500 font-bold uppercase mb-2">Pending Withdrawals</p>
-                <h3 id="wCount" class="text-3xl font-black text-orange-500 font-black">0</h3>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div class="bg-slate-900 p-8 rounded-[3rem] border border-slate-800 space-y-6">
-                <h2 class="text-xl font-bold italic">Deploy New Task</h2>
-                <input id="tTitle" type="text" placeholder="Task Name" class="w-full bg-black p-4 rounded-xl">
-                <input id="tReward" type="number" placeholder="Reward ₹" class="w-full bg-black p-4 rounded-xl">
-                <input id="tLink" type="text" placeholder="Adsterra/App Link" class="w-full bg-black p-4 rounded-xl">
-                <button onclick="addTask()" class="w-full bg-amber-400 text-black p-4 rounded-xl font-black">DEPLOY TASK</button>
-            </div>
-
-            <div class="bg-slate-900 p-8 rounded-[3rem] border border-slate-800 space-y-6">
-                <h2 class="text-xl font-bold italic">Manage Payouts</h2>
-                <div id="withdrawList" class="space-y-4 text-xs">
-                    <!-- List items -->
+        <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- STATS OVERVIEW (Admin Profit Tracking) -->
+            <div class="lg:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="admin-card p-5 rounded-2xl">
+                    <p class="text-gray-400 text-xs uppercase">Total Users</p>
+                    <h3 id="stat-users" class="text-2xl font-bold">0</h3>
+                </div>
+                <div class="admin-card p-5 rounded-2xl border-l-4 border-yellow-500">
+                    <p class="text-gray-400 text-xs uppercase">Pending Payouts</p>
+                    <h3 id="stat-pending" class="text-2xl font-bold text-yellow-500">₹0</h3>
+                </div>
+                <div class="admin-card p-5 rounded-2xl border-l-4 border-green-500">
+                    <p class="text-gray-400 text-xs uppercase">Total Paid</p>
+                    <h3 id="stat-paid" class="text-2xl font-bold text-green-500">₹0</h3>
+                </div>
+                <div class="admin-card p-5 rounded-2xl bg-blue-900/10">
+                    <p class="text-gray-400 text-xs uppercase">System Profit</p>
+                    <h3 class="text-2xl font-bold text-blue-400">SAFE</h3>
                 </div>
             </div>
+
+            <!-- REWARD CONFIGURATION (Admin can edit all rewards) -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="admin-card p-6 rounded-2xl">
+                    <h3 class="font-bold mb-4 flex items-center gap-2 text-blue-400">
+                        <i class="fas fa-coins"></i> Manage Rewards
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] text-gray-400 uppercase">Check-in Reward (Day 1)</label>
+                            <input type="number" id="set-checkin" value="0.1" class="input-box">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 uppercase">Smartlink CPM (User Reward)</label>
+                            <input type="number" id="set-smartlink" value="0.5" class="input-box">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 uppercase">Minimum Withdrawal (₹)</label>
+                            <input type="number" id="set-min" value="100" class="input-box">
+                        </div>
+                        <button onclick="saveSettings()" class="w-full bg-green-600 py-3 rounded-xl font-bold shadow-lg">UPDATE SYSTEM</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WITHDRAWAL MANAGEMENT -->
+            <div class="lg:col-span-8">
+                <div class="admin-card p-6 rounded-2xl overflow-x-auto">
+                    <h3 class="font-bold mb-4 flex items-center gap-2 text-yellow-500">
+                        <i class="fas fa-wallet"></i> Withdrawal Requests
+                    </h3>
+                    <table class="w-full text-left">
+                        <thead class="text-xs text-gray-400 border-b border-white/10">
+                            <tr>
+                                <th class="pb-3">User/Phone</th>
+                                <th class="pb-3">Amount</th>
+                                <th class="pb-3">Method</th>
+                                <th class="pb-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdraw-table" class="text-sm">
+                            <!-- Requests will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        const MASTER_PIN = "241204"; 
-        const backendUrl = "https://earn-hub-z1su.onrender.com";
+        // Firebase Config (Must be same as User Panel)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        function checkPin() {
-            if(document.getElementById('pin').value === MASTER_PIN) {
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('panel').classList.remove('hidden');
-                loadStats();
+        // 1. Password Protection Logic
+        function loginAdmin() {
+            const pass = document.getElementById('admin-pass').value;
+            if(pass === "v-786-admin") { // Aapka Master Password
+                document.getElementById('admin-login').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                loadDashboardData();
+            } else {
+                alert("ACCESS DENIED: Wrong Password");
             }
         }
 
-        async function loadStats() {
-            const res = await fetch(`${backendUrl}/api/admin/stats`);
-            const d = await res.json();
-            document.getElementById('uCount').innerText = d.totalUsers;
-            document.getElementById('wCount').innerText = d.pendingWithdraws.length;
+        // 2. Load Real-time Data
+        function loadDashboardData() {
+            // Get Total Users
+            db.collection('users').get().then(snap => {
+                document.getElementById('stat-users').innerText = snap.size;
+            });
+
+            // Get Pending Withdrawals
+            db.collection('withdrawals').where('status', '==', 'pending')
+              .onSnapshot(snap => {
+                let list = "";
+                let totalPending = 0;
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    totalPending += data.amount;
+                    list += `
+                        <tr class="border-b border-white/5">
+                            <td class="py-4">${data.userName}<br><span class="text-[10px] text-gray-500">${data.userId}</span></td>
+                            <td class="py-4 font-bold">₹${data.amount}</td>
+                            <td class="py-4">${data.method}<br><span class="text-[10px] text-blue-400">${data.upiId}</span></td>
+                            <td class="py-4">
+                                <button onclick="markPaid('${doc.id}')" class="bg-green-600 px-3 py-1 rounded text-xs">PAID</button>
+                                <button onclick="rejectReq('${doc.id}')" class="bg-red-600 px-3 py-1 rounded text-xs ml-1">X</button>
+                            </td>
+                        </tr>`;
+                });
+                document.getElementById('withdraw-table').innerHTML = list;
+                document.getElementById('stat-pending').innerText = "₹" + totalPending;
+            });
         }
 
-        async function addTask() {
-            // Logic to send task to backend
-            alert("Task Deployed!");
+        // 3. System Global Settings Update
+        function saveSettings() {
+            const checkin = document.getElementById('set-checkin').value;
+            const smart = document.getElementById('set-smartlink').value;
+            const min = document.getElementById('set-min').value;
+
+            db.collection('admin').doc('settings').set({
+                checkInBase: parseFloat(checkin),
+                smartlinkReward: parseFloat(smart),
+                minWithdraw: parseFloat(min),
+                lastUpdated: new Date()
+            }).then(() => alert("All user rewards updated instantly!"));
+        }
+
+        // 4. Handle Payouts
+        function markPaid(id) {
+            if(confirm("Confirm Payment? This will deduct balance from user wallet.")){
+                db.collection('withdrawals').doc(id).update({ status: 'paid' })
+                  .then(() => alert("Marked as Paid!"));
+            }
         }
     </script>
 </body>
