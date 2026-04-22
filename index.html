@@ -2,176 +2,180 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earning Hub | Bharat's Premium Money Earning Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EarningHub - Login & Earn</title>
     
-    <!-- ADVANCED SEO -->
-    <meta name="description" content="Earning Hub par rozana tasks aur videos dekh kar paise kamayein. Trusted UPI withdrawals aur daily rewards.">
-    <meta name="keywords" content="Earning Hub, online paise kamayein, daily checkin, upi withdrawal, real earning app">
-    <meta name="robots" content="index, follow">
+    <!-- SEO Tags -->
+    <meta name="description" content="EarningHub: Complete surveys, tasks and earn daily money. Withdraw via UPI/Paytm.">
+    <meta name="keywords" content="earning app, make money online, paytm cash, upi withdrawal">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0f172a; color: white; }
-        .screen { display: none; }
-        .active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .card { background: #1e293b; border-radius: 24px; border: 1px solid #334155; }
-        .streak-dot { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 2px solid #334155; }
-        .streak-dot.active { background: #fbbf24; border-color: #fbbf24; color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
-        .toast { position: fixed; bottom: 100px; left: 20px; right: 20px; background: #1e293b; padding: 15px; border-radius: 15px; border: 1px solid #fbbf24; z-index: 9999; transform: translateY(200px); transition: 0.5s; }
-        .toast.show { transform: translateY(0); }
+        body { background-color: #0A0E17; color: white; font-family: 'Inter', sans-serif; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .gradient-btn { background: linear-gradient(90deg, #2563eb, #4f46e5); }
+        .hidden-view { display: none; }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 100; left: 50%; transform: translateX(-50%); bottom: 30px; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen relative shadow-2xl bg-slate-950">
+<body>
 
-    <!-- Custom Pro Toast -->
-    <div id="toast" class="toast flex items-center gap-3">
-        <span class="text-xl">💰</span>
-        <p id="toastMsg" class="text-sm font-bold"></p>
-    </div>
+    <div id="toast">Message here...</div>
 
-    <!-- 1. AUTH SCREEN -->
-    <div id="authPage" class="screen p-8 pt-20">
-        <h1 class="text-4xl font-black text-amber-400 mb-2 italic tracking-tighter uppercase">Earning<span class="text-white">Hub</span></h1>
-        <p class="text-slate-500 text-xs mb-12 uppercase tracking-widest">Premium Rewards Platform</p>
-        
-        <div id="loginForm" class="space-y-4">
-            <input id="lEmail" type="email" placeholder="Email Address" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none focus:border-amber-400">
-            <input id="lPass" type="password" placeholder="Password" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none focus:border-amber-400">
-            <button onclick="login()" class="w-full bg-amber-400 text-black font-black py-4 rounded-2xl shadow-xl">LOG IN</button>
-            <p class="text-center text-xs">Account nahi hai? <span onclick="toggleAuth()" class="text-amber-400 font-bold cursor-pointer">Sign Up</span></p>
+    <!-- 1. AUTH VIEW (Signup/Login) -->
+    <section id="auth-view" class="min-h-screen flex flex-col justify-center p-6">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-black text-blue-500 italic">EarningHub</h1>
+            <p class="text-gray-400 mt-2">Login to start earning today</p>
         </div>
 
-        <div id="signupForm" class="hidden space-y-4">
-            <input id="sEmail" type="email" placeholder="Email Address" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none">
-            <input id="sPass" type="password" placeholder="Set Password" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none">
-            <button onclick="signup()" class="w-full bg-amber-400 text-black font-black py-4 rounded-2xl shadow-xl">SIGN UP</button>
-            <p class="text-center text-xs">Pehle se account hai? <span onclick="toggleAuth()" class="text-amber-400 font-bold cursor-pointer">Log In</span></p>
+        <!-- Login Form -->
+        <div id="login-form" class="glass-card p-8 rounded-3xl space-y-4">
+            <input type="email" id="login-email" placeholder="Email Address" class="w-full bg-slate-800 p-4 rounded-xl border border-white/10 outline-none focus:border-blue-500">
+            <input type="password" id="login-pass" placeholder="Password" class="w-full bg-slate-800 p-4 rounded-xl border border-white/10 outline-none focus:border-blue-500">
+            <button onclick="handleLogin()" class="w-full gradient-btn py-4 rounded-xl font-bold uppercase tracking-widest shadow-lg">Login</button>
+            <p class="text-center text-sm text-gray-400">Don't have an account? <span onclick="toggleAuth()" class="text-blue-500 font-bold cursor-pointer">Register</span></p>
         </div>
-    </div>
 
-    <!-- 2. HOME SCREEN -->
-    <div id="homePage" class="screen pb-24">
-        <header class="p-6 flex justify-between items-center sticky top-0 bg-slate-950/90 backdrop-blur-lg z-50">
-            <h2 class="text-xl font-black italic">EARNING HUB</h2>
-            <div class="bg-amber-400 text-black px-4 py-1.5 rounded-full font-black text-sm flex items-center gap-2">
-                <i class="fa-solid fa-wallet"></i> ₹<span id="topBal">0.00</span>
+        <!-- Signup Form (Hidden by default) -->
+        <div id="signup-form" class="glass-card p-8 rounded-3xl space-y-4 hidden-view">
+            <input type="text" id="reg-name" placeholder="Full Name" class="w-full bg-slate-800 p-4 rounded-xl border border-white/10 outline-none focus:border-blue-500">
+            <input type="email" id="reg-email" placeholder="Email Address" class="w-full bg-slate-800 p-4 rounded-xl border border-white/10 outline-none focus:border-blue-500">
+            <input type="password" id="reg-pass" placeholder="Create Password" class="w-full bg-slate-800 p-4 rounded-xl border border-white/10 outline-none focus:border-blue-500">
+            <button onclick="handleSignup()" class="w-full gradient-btn py-4 rounded-xl font-bold uppercase tracking-widest">Create Account</button>
+            <p class="text-center text-sm text-gray-400">Already have an account? <span onclick="toggleAuth()" class="text-blue-500 font-bold cursor-pointer">Login</span></p>
+        </div>
+    </section>
+
+    <!-- 2. MAIN DASHBOARD VIEW (Hidden until login) -->
+    <section id="main-view" class="hidden-view pb-24">
+        <!-- Top Nav -->
+        <div class="p-5 flex justify-between items-center sticky top-0 bg-[#0A0E17] z-50">
+            <h1 class="text-xl font-bold italic">Earning<span class="text-blue-500">Hub</span></h1>
+            <div class="bg-blue-900/30 border border-blue-500/30 px-3 py-1 rounded-full text-yellow-400 font-bold">
+                🪙 <span id="balance-display">0.00</span>
             </div>
-        </header>
+        </div>
 
-        <main class="p-4 space-y-6">
-            <!-- Visual Streak (Microsoft Style) -->
-            <div class="card p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-sm">7-Day Streak Bonus</h3>
-                    <span id="streakText" class="text-[10px] bg-slate-800 px-2 py-1 rounded-lg text-amber-400 font-bold">DAY 1</span>
+        <div class="p-4 space-y-6">
+            <!-- Wallet -->
+            <div class="glass-card p-6 rounded-[2rem] relative overflow-hidden">
+                <p class="text-gray-400 text-sm">Main Balance</p>
+                <h2 class="text-4xl font-bold">₹<span id="cash-display">0.00</span></h2>
+                <button onclick="showWithdrawModal()" class="w-full mt-4 py-3 bg-blue-600 rounded-xl font-bold">WITHDRAW</button>
+            </div>
+
+            <!-- Daily Checkin -->
+            <div class="glass-card p-5 rounded-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold">Daily Check-in</h3>
+                    <span class="text-xs text-blue-400">7 Days Streak</span>
                 </div>
-                <div class="flex justify-between items-center px-2" id="streakGrid">
-                    <!-- Dots generated by JS -->
+                <div class="grid grid-cols-4 gap-2" id="checkin-grid">
+                    <!-- Days will be loaded here -->
                 </div>
-                <button onclick="claimCheckin()" class="w-full mt-8 bg-amber-400 text-black py-4 rounded-2xl font-black text-xs uppercase shadow-lg shadow-amber-400/20">Claim Reward</button>
             </div>
 
-            <!-- CPA Tasks -->
-            <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest ml-2">CPA Offers (Direct)</h3>
-            <div id="cpaTasks" class="space-y-3">
-                <!-- Task Cards -->
-            </div>
-
-            <!-- Video Section -->
-            <div onclick="showPage('videoPage')" class="bg-gradient-to-r from-amber-400 to-orange-500 p-6 rounded-3xl text-black flex justify-between items-center shadow-lg active:scale-95 transition-all">
-                <div>
-                    <h3 class="font-black text-lg italic uppercase">Extra Earning</h3>
-                    <p class="text-[10px] font-bold opacity-80 uppercase">Smartlinks & Video Ads</p>
+            <!-- Task List -->
+            <div class="space-y-3">
+                <h3 class="text-xs font-bold text-gray-500 uppercase">Available Tasks</h3>
+                <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-link text-blue-400 text-xl"></i>
+                        <div><p class="font-bold text-sm">Smartlink Ad</p><p class="text-[10px] text-gray-400">Earn ₹0.50 per click</p></div>
+                    </div>
+                    <button class="bg-blue-600 px-4 py-1 rounded-lg text-xs">GO</button>
                 </div>
-                <i class="fa-solid fa-play-circle text-3xl"></i>
             </div>
-        </main>
-    </div>
-
-    <!-- 3. WALLET / WITHDRAW SCREEN -->
-    <div id="walletPage" class="screen p-6">
-        <h2 class="text-3xl font-black mb-8">Wallet</h2>
-        <div class="card p-8 bg-slate-900 mb-8">
-            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Main Balance</p>
-            <h3 class="text-5xl font-black mt-2">₹<span id="wallBal">0.00</span></h3>
         </div>
-        
-        <div class="space-y-4">
-            <input id="upi" type="text" placeholder="UPI ID (example@upi)" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none">
-            <input id="wAmt" type="number" placeholder="Amount (Min ₹100)" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-2xl outline-none">
-            <button onclick="withdraw()" class="w-full bg-green-500 text-black font-black py-4 rounded-2xl">WITHDRAW TO UPI</button>
-        </div>
-    </div>
 
-    <!-- Bottom Navigation -->
-    <nav id="navbar" class="fixed bottom-0 max-w-md w-full bg-slate-900/95 border-t border-slate-800 p-5 flex justify-around rounded-t-[2.5rem] shadow-2xl hidden">
-        <button onclick="showPage('homePage')" class="text-amber-400 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-house-chimney text-xl"></i>Home</button>
-        <button onclick="showPage('walletPage')" class="text-slate-500 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-wallet text-xl"></i>Wallet</button>
-        <button onclick="logout()" class="text-slate-500 flex flex-col items-center gap-1 font-bold text-[10px]"><i class="fa-solid fa-power-off text-xl"></i>Logout</button>
-    </nav>
+        <!-- Bottom Menu -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-white/10 h-16 flex justify-around items-center px-4">
+            <div class="text-blue-500 flex flex-col items-center"><i class="fas fa-home"></i><span class="text-[10px]">Home</span></div>
+            <div onclick="showRefer()" class="text-gray-500 flex flex-col items-center"><i class="fas fa-users"></i><span class="text-[10px]">Refer</span></div>
+            <div onclick="logoutUser()" class="text-gray-500 flex flex-col items-center"><i class="fas fa-sign-out-alt"></i><span class="text-[10px]">Logout</span></div>
+        </nav>
+    </section>
 
+    <!-- FIREBASE & LOGIC SCRIPT -->
     <script>
-        const backendUrl = "https://earn-hub-z1su.onrender.com"; 
+        // Firebase Configuration (Replace with your actual keys from Firebase Console)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
         
-        function toast(msg) {
-            const t = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        async function signup() {
-            const email = document.getElementById('sEmail').value;
-            const password = document.getElementById('sPass').value;
-            const deviceId = localStorage.getItem('deviceId') || "EH_" + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('deviceId', deviceId);
-
-            const res = await fetch(`${backendUrl}/api/auth/signup`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ email, password, deviceId })
-            });
-            const d = await res.json();
-            if(res.ok) { toast("Signup Successful!"); toggleAuth(); }
-            else { toast(d.msg); }
-        }
-
-        async function login() {
-            const email = document.getElementById('lEmail').value;
-            const password = document.getElementById('lPass').value;
-            const res = await fetch(`${backendUrl}/api/auth/login`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ email, password })
-            });
-            const d = await res.json();
-            if(res.ok) {
-                localStorage.setItem('userId', d.userId);
-                location.reload();
-            } else { toast(d.msg); }
-        }
-
-        function toggleAuth() {
-            document.getElementById('loginForm').classList.toggle('hidden');
-            document.getElementById('signupForm').classList.toggle('hidden');
-        }
-
-        function showPage(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        window.onload = () => {
-            if(localStorage.getItem('userId')) {
-                showPage('homePage');
-                document.getElementById('navbar').classList.remove('hidden');
-                loadData();
+        // Check Auth State
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('auth-view').classList.add('hidden-view');
+                document.getElementById('main-view').classList.remove('hidden-view');
+                loadUserData(user.uid);
             } else {
-                showPage('authPage');
+                document.getElementById('auth-view').classList.remove('hidden-view');
+                document.getElementById('main-view').classList.add('hidden-view');
             }
+        });
+
+        // Toggle Signup/Login
+        function toggleAuth() {
+            document.getElementById('login-form').classList.toggle('hidden-view');
+            document.getElementById('signup-form').classList.toggle('hidden-view');
+        }
+
+        // Signup Logic
+        function handleSignup() {
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+            const name = document.getElementById('reg-name').value;
+
+            auth.createUserWithEmailAndPassword(email, pass)
+                .then((cred) => {
+                    return db.collection('users').doc(cred.user.uid).set({
+                        name: name,
+                        balance: 0,
+                        referCode: Math.random().toString(36).substring(7).toUpperCase(),
+                        lastCheckIn: null
+                    });
+                })
+                .catch(err => alert(err.message));
+        }
+
+        // Login Logic
+        function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            auth.signInWithEmailAndPassword(email, pass).catch(err => alert(err.message));
+        }
+
+        // Logout
+        function logoutUser() { auth.signOut(); }
+
+        // Fetch User Data
+        function loadUserData(uid) {
+            db.collection('users').doc(uid).onSnapshot(doc => {
+                const data = doc.data();
+                document.getElementById('balance-display').innerText = data.balance.toFixed(2);
+                document.getElementById('cash-display').innerText = data.balance.toFixed(2);
+            });
         }
     </script>
 </body>
