@@ -1,9 +1,21 @@
 {
-  "name": "Earning hub",
-  "short_name": "Earning hub",
+  "name": "EarningHub - Task & Earn",
+  "short_name": "EarningHub",
+  "description": "Complete simple tasks and earn real money daily.",
   "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
-  "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2331/2331941.png", "sizes": "512x512", "type": "image/png" }]
+  "background_color": "#0A0E17",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2489/2489756.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2489/2489756.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
